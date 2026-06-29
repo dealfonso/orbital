@@ -11,9 +11,41 @@ export class I18n {
     return I18n.instance;
   }
 
+  /**
+   * Translates a key to the current language, replacing variables if provided.
+   *  (syntactic sugar for I18n.getInstance().t())
+   * @param {string} key - The translation key.
+   * @param {Object} vars - Variables to replace in the translated string.
+   * @returns {string} The translated string or the key if not found.
+   */
+  static t(key, vars = {}) {
+    return I18n.getInstance().t(key, vars);
+  }
+
   constructor() {
+    this.collectStrings = false;
     this.translations = {};
+    this.collectedStrings = {};
     this.currentLanguage = null;
+  }
+
+  /**
+   * Enables or disables string collection, when using t() method. When enabled, all translation keys used will be collected in an object for later use.
+   * @param {boolean} enable - Whether to enable string collection.
+   */
+  setCollectStrings(enable = true) {
+    this.collectStrings = enable;
+    if (enable) {
+      this.collectedStrings = {};
+    }
+  }
+
+  /**
+   * Returns the collected strings.
+   * @returns {Object} The collected strings.
+   */
+  getCollectedStrings() {
+    return structuredClone(this.collectedStrings);
   }
 
   // The translations object is structured as follows:
@@ -148,8 +180,28 @@ export class I18n {
     if (!lang) {
       lang = this.currentLanguage;
     }
-    const dict = this.translations[lang] || this.translations[this.getSupportedLanguages()[0]] || {};
-    let value = dict[key] ?? this.translations[this.getSupportedLanguages()[0]][key] ?? key;
+
+    let dict = {};
+    let effectiveLang = null;
+    if (this.translations[lang]) {
+      dict = this.translations[lang];
+      effectiveLang = lang;
+    } else if (this.translations[this.getSupportedLanguages()[0]]) {
+      dict = this.translations[this.getSupportedLanguages()[0]];
+      effectiveLang = this.getSupportedLanguages()[0];
+    }
+
+    // const dict = this.translations[lang] || this.translations[this.getSupportedLanguages()[0]] || {};
+    // let value = dict[key] ?? this.translations[this.getSupportedLanguages()[0]][key] ?? key;
+    let value = dict[key] ?? key;
+
+    if (this.collectStrings) {
+      if (!this.collectedStrings[effectiveLang]) {
+        this.collectedStrings[effectiveLang] = {};
+      }
+      this.collectedStrings[effectiveLang][key] = value;
+    }
+
     for (const [varName, varValue] of Object.entries(vars)) {
       value = value.replaceAll(`{${varName}}`, String(varValue));
     }
