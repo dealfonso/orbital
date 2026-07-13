@@ -17,11 +17,12 @@ export function createElement(tag, classNames = [], attributes = {}) {
 }
 
 export function snakeCaseToCamelCase(str) {
-    return str.replace(/([-_][a-z])/g, (group) =>
+    const result = str.replace(/([-_][a-z])/g, (group) =>
         group.toUpperCase()
             .replace('-', '')
             .replace('_', '')
     );
+    return result;
 }
 
 export const s2c = snakeCaseToCamelCase;

@@ -1,5 +1,11 @@
 export class I18n {
 
+  static defaultOptions = {
+    missingKeyCallback: (key, lang) => key,
+  }
+
+  static instance = null;
+
   /**
    * Returns the singleton instance of the I18n class.
    * @returns {I18n} The singleton instance.
@@ -22,11 +28,12 @@ export class I18n {
     return I18n.getInstance().t(key, vars);
   }
 
-  constructor() {
+  constructor(options = {}) {
     this.collectStrings = false;
     this.translations = {};
     this.collectedStrings = {};
     this.currentLanguage = null;
+    this.options = { ...options };
   }
 
   /**
@@ -191,9 +198,21 @@ export class I18n {
       effectiveLang = this.getSupportedLanguages()[0];
     }
 
+    let value = null;
+
+    // If the key is not found in the dictionary, return the key itself or use the missingKeyCallback if provided
+    if (dict[key] === undefined) {
+      value = key;
+      if (this.options.missingKeyCallback && typeof this.options.missingKeyCallback === "function") {
+        value = this.options.missingKeyCallback(key, effectiveLang);
+      }
+    } else {
+      value = dict[key];
+    }
+
     // const dict = this.translations[lang] || this.translations[this.getSupportedLanguages()[0]] || {};
     // let value = dict[key] ?? this.translations[this.getSupportedLanguages()[0]][key] ?? key;
-    let value = dict[key] ?? key;
+    // let value = dict[key] ?? key;
 
     if (this.collectStrings) {
       if (!this.collectedStrings[effectiveLang]) {

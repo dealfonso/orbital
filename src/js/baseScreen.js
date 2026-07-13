@@ -31,6 +31,7 @@ export class BaseScreen {
         this.acquireElements(uiElementIds);
         this.acquireElementsBySelector(uiElementSelectors);
         this.options = { ...defaultOptions, ...options };
+        this._initialized = false;
     }
 
     /**
@@ -39,7 +40,12 @@ export class BaseScreen {
      *  you could call it separately after creating an instance of the screen.
      */
     init() {
-        this.initEventListeners();
+        // Avoid re-initializing the screen if it has already been initialized. 
+        //  This is useful if you want to call init() multiple times, for example, if you want to re-initialize the screen after it has been hidden and shown again.
+        if (!this._initialized) {
+            this._initialized = true;
+            this.initEventListeners();
+        }
     }
 
     /**
@@ -50,6 +56,11 @@ export class BaseScreen {
      * @param {any} payload optional data to pass to the screen when showing it. For example, you could pass the current game state or user settings.
      */
     show(payload = null) {
+        // This is a lazy initialization approach. We only initialize the screen when it is shown for the first time. 
+        //  This way, we avoid unnecessary initialization of screens that may never be shown.
+        if (!this._initialized) {
+            this.init();
+        }
         this.options.visibleClass.split(" ").forEach(cls => this.container.classList.add(cls));
         this.options.hiddenClass.split(" ").forEach(cls => this.container.classList.remove(cls));
         this.activate(payload);

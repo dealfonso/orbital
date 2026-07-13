@@ -1,4 +1,4 @@
-# jsWebGame
+# JWG - JSWebGame
 
 Libreria ligera para crear juegos web con HTML, CSS y JavaScript.
 

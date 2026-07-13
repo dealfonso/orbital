@@ -24,3 +24,12 @@ await build({
 });
 
 console.log("dist/index.js generated (single minified bundle)");
+
+await build({
+    entryPoints: [join(srcDir, "style.css")],
+    outfile: join(distDir, "style.css"),
+    bundle: true,
+    minify: true
+});
+
+console.log("dist/style.css generated (single minified bundle)");

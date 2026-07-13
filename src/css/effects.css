@@ -1,0 +1,144 @@
+:root {
+    --slide-distance: 60px; /* Distancia de desplazamiento para los efectos */
+    --animation-duration: 0.30s; /* Duración de la animación */
+    --scale-factor: 0.1; /* Factor de escala para los efectos de rebote */
+    --shake-distance: 5px; /* Distancia de desplazamiento para el efecto de sacudida */
+}
+.jwg-effects {
+    animation: var(--fade-animation, none), var(--slide-animation, none), var(--scale-animation, none), var(--shake-animation, none), var(--rotate-center-animation, none);
+}
+.jwg-fade-in {
+    --fade-animation: fadeIn var(--animation-duration, 0.22s) ease;
+}
+.jwg-fade-out {
+    --fade-animation: fadeOut var(--animation-duration, 0.22s) ease;
+}
+.jwg-fade-in-before {
+    --fade-animation: fadeInBefore var(--animation-duration, 0.22s) ease;
+}
+.jwg-fade-out-before {
+    --fade-animation: fadeOutBefore var(--animation-duration, 0.22s) ease;
+}
+.jwg-slide-up {
+    --slide-animation: slideUp var(--animation-duration, 0.22s) ease;
+}
+.jwg-slide-down {
+    --slide-animation: slideDown var(--animation-duration, 0.22s) ease;
+}
+.jwg-slide-left {
+    --slide-animation: slideLeft var(--animation-duration, 0.22s) ease;
+}
+.jwg-slide-right {
+    --slide-animation: slideRight var(--animation-duration, 0.22s) ease;
+}
+.jwg-scale-up {
+    --scale-animation: scaleUp var(--animation-duration, 0.22s) ease;
+}
+.jwg-scale-down {
+    --scale-animation: scaleDown var(--animation-duration, 0.22s) ease;
+}
+.jwg-scale-bounce {
+    --scale-factor: 0.1; /* Factor de escala para el efecto de rebote */
+    --scale-animation: scaleBounce var(--animation-duration, 0.22s) ease;
+}
+.jwg-effect-strong {
+    --shake-distance: 10px; /* Distancia de desplazamiento para el efecto de sacudida fuerte */
+    --scale-factor: 0.2; /* Factor de escala para el efecto de rebote fuerte */
+    --slide-distance: calc(var(--slide-distance, 60px) * 1.5); /* Distancia de desplazamiento para los efectos fuertes */
+}
+.jwg-effect-weak {
+    --shake-distance: 2px; /* Distancia de desplazamiento para el efecto de sacudida débil */
+    --scale-factor: 0.05; /* Factor de escala para el efecto de rebote débil */
+    --slide-distance: calc(var(--slide-distance, 60px) * 0.5); /* Distancia de desplazamiento para los efectos débiles */
+}
+.jwg-shake {
+    animation: shake var(--animation-duration, 0.22s) ease-in-out;
+}
+.jwg-shake.fast {
+    animation-duration: 0.25s; /* Duración de la animación para el efecto de sacudida rápida */
+}
+.jwg-shake.slow {
+    animation-duration: 1s; /* Duración de la animación para el efecto de sacudida lenta */
+}
+.jwg-shake.fast {
+    --animation-duration: 0.20s; /* Duración de la animación para el efecto rápido */
+}
+.jwg-shake.very-fast {
+    --animation-duration: 0.10s; /* Duración de la animación para el efecto muy rápido */
+}
+.jwg-shake.slow {
+    --animation-duration: 1s; /* Duración de la animación para el efecto lento */
+}
+.jwg-very-slow {
+    --animation-duration: 2s; /* Duración de la animación para el efecto muy lento */
+}
+.jwg-rotate-in-center {
+    --rotate-center-animation: rotateInCenter var(--animation-duration, 0.22s) ease;
+}
+@keyframes shake {
+    0% { transform: translateX(0); }
+    10% { transform: translateX(calc(-1 * var(--shake-distance, 5px))); }
+    20% { transform: translateX(var(--shake-distance, 5px)); }
+    30% { transform: translateX(calc(-1 * var(--shake-distance, 5px))); }
+    40% { transform: translateX(var(--shake-distance, 5px)); }
+    50% { transform: translateX(calc(-1 * var(--shake-distance, 5px))); }
+    60% { transform: translateX(var(--shake-distance, 5px)); }
+    70% { transform: translateX(calc(-1 * var(--shake-distance, 5px))); }
+    80% { transform: translateX(var(--shake-distance, 5px)); }
+    90% { transform: translateX(calc(-1 * var(--shake-distance, 5px))); }
+    100% { transform: translateX(0); }
+}
+@keyframes rotateInCenter {
+    0% { transform: rotate(-15deg); }
+    30% { transform: rotate(10deg); }
+    50% { transform: rotate(-5deg); }
+    70% { transform: rotate(5deg); }
+    100% { transform: rotate(0); }
+}
+@keyframes scaleBounce {
+    0% { transform: scale(calc(1 - var(--scale-factor, 0.1) * 0.5)); }
+    30% { transform: scale(calc(1 + var(--scale-factor, 0.1))); }
+    50% { transform: scale(calc(1 - var(--scale-factor, 0.1))); }
+    70% { transform: scale(calc(1 + var(--scale-factor, 0.1) * 0.5)); }
+    100% { transform: scale(1); }
+}
+@keyframes scaleUp {
+    from { transform: scale(calc(1 - var(--scale-factor, 0.1))); }
+    to { transform: scale(1); }
+}
+@keyframes scaleDown {
+    from { transform: scale(calc(1 + var(--scale-factor, 0.1))); }
+    to { transform: scale(1); }
+}
+@keyframes slideUp {
+    from { transform: translateY(var(--slide-distance, 60px)) }
+    to { transform: translateY(0); }
+}
+@keyframes slideDown {
+    from { transform: translateY(calc(-1 * var(--slide-distance, 60px))); }
+    to { transform: translateY(0); }
+}
+@keyframes slideLeft {
+    from { transform: translateX(var(--slide-distance, 60px)); }
+    to { transform: translateX(0); }
+}
+@keyframes slideRight {
+    from { transform: translateX(calc(-1 * var(--slide-distance, 60px))); }
+    to { transform: translateX(0); }
+}
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+@keyframes fadeOut {
+    from { opacity: 1; }
+    to { opacity: 0; }
+}
+@keyframes fadeInBefore {
+    0% { opacity: 0; }
+    30% { opacity: 1; }
+}
+@keyframes fadeOutBefore {
+    0% { opacity: 1; }
+    30% { opacity: 0; }
+}

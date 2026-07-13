@@ -1,14 +1,16 @@
 {
-  "name": "js-web-game",
-  "version": "1.0.0",
-  "description": "Helpers to build HTML/CSS/JavaScript web games with screen navigation, state management and i18n.",
+  "name": "jwg",
+  "version": "1.0.1",
+  "description": "JWG is a set of helpers to build HTML/CSS/JavaScript web games with screen navigation, state management and i18n.",
   "type": "module",
   "main": "./dist/index.js",
   "module": "./dist/index.js",
   "jsdelivr": "./dist/index.js",
   "unpkg": "./dist/index.js",
+  "style": "./dist/style.css",
   "exports": {
-    ".": "./dist/index.js"
+    ".": "./dist/index.js",
+    "./style.css": "./dist/style.css"
   },
   "scripts": {
     "clean": "rm -rf dist",
