@@ -1,4 +1,4 @@
-.jwg-modal {
+.orb-modal {
     --text: rgba(75, 75, 75, 1);
     --surface: rgba(255, 255, 255, 0.90);
     --surface-strong: rgba(255, 255, 255, 1);
@@ -15,7 +15,7 @@
     z-index: 1000;
 }
 
-.jwg-modal-content {
+.orb-modal-content {
     position: relative;
     background-color: var(--surface);
     color: var(--text);
@@ -26,11 +26,11 @@
     width: 80%;
 }
 
-.jwg-modal.not-active {
+.orb-modal.not-active {
     display: none !important;
 }
 
-.jwg-btn-close {
+.orb-btn-close {
     position: absolute;
     top: 10px;
     right: 10px;

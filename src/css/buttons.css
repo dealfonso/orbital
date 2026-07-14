@@ -10,7 +10,7 @@
     --nova-shadow-dark: rgba(255, 95, 162, .5);
 }
 
-.jwg-btn {
+.orb-btn {
     color: var(--text);
     background: none;
     padding: 12px 22px;
@@ -19,27 +19,27 @@
     background: var(--surface);
 }
 
-.jwg-btn:hover {
+.orb-btn:hover {
     background: var(--surface-strong);
     cursor: pointer;
 }
 
-.jwg-btn:active {
+.orb-btn:active {
     background: var(--surface-strong);
     transform: scale(0.95);
 }
 
-.jwg-btn:focus {
+.orb-btn:focus {
     outline: none;
     box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.5), 0 7px 12px rgba(255, 255, 255, .35);
 }
 
-.jwg-btn:disabled {
+.orb-btn:disabled {
     opacity: 0.5;
     cursor: not-allowed;
 }
 
-.jwg-btn.icon-btn {
+.orb-btn.icon-btn {
     background: none;
     cursor: pointer;
     font-size: 1.5rem;
@@ -57,28 +57,28 @@
     box-shadow: 0 7px 12px var(--nova-shadow);
     transition: transform .08s ease, box-shadow .08s ease;
 }
-.jwg-btn.icon-btn:active {
+.orb-btn.icon-btn:active {
     transform: scale(.9);
     box-shadow: 0 3px 6px var(--nova-shadow);
 }
-.jwg-btn.icon-btn:focus {
+.orb-btn.icon-btn:focus {
     outline: none;
     box-shadow: 0 0 0 3px var(--nova-shadow-dark), 0 7px 12px var(--nova-shadow);
 }
-.jwg-btn.icon-btn:hover {
+.orb-btn.icon-btn:hover {
     background-color: var(--nova-dark);
 }
-.jwg-btn.icon-btn.xl {
+.orb-btn.icon-btn.xl {
     width: 3.5rem;
     height: 3.5rem;
     font-size: 2rem;
 }
-.jwg-btn.icon-btn.xxl {
+.orb-btn.icon-btn.xxl {
     width: 4.5rem;
     height: 4.5rem;
     font-size: 2.5rem;
 }
-.jwg-button-group {
+.orb-button-group {
     display: flex;
     gap: 1rem;
 }

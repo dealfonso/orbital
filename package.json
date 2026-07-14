@@ -1,7 +1,7 @@
 {
-  "name": "jwg",
+  "name": "orbital",
   "version": "1.1.0",
-  "description": "JWG is a set of helpers to build HTML/CSS/JavaScript web games with screen navigation, state management and i18n.",
+  "description": "Orbital (ORB) is a lightweight framework to build interactive HTML/CSS/JavaScript apps with screen navigation, state flows and i18n.",
   "type": "module",
   "main": "./dist/index.js",
   "module": "./dist/index.js",
@@ -26,8 +26,9 @@
   ],
   "license": "MIT",
   "keywords": [
-    "game",
-    "webgame",
+    "framework",
+    "webapp",
+    "pwa",
     "javascript",
     "state-machine",
     "i18n",

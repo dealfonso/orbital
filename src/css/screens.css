@@ -1,10 +1,10 @@
-.app-shell {
+.orb-app-shell {
   height: 100dvh;
   position: relative;
   overflow: hidden;
 }
 
-.screen {
+.orb-screen {
   position: absolute;
   inset: 0;
   padding: clamp(14px, 3.2vw, 34px);
@@ -13,11 +13,11 @@
   transition: all 300ms ease;
 }
 
-.screen.not-active {
+.orb-screen.not-active {
   display: none !important;
 }
 
-.screen-content {
+.orb-screen-content {
     height: 100%;
     width: min(680px, 100%);
     margin-left: auto;
@@ -31,12 +31,12 @@
     background-color: rgba(255, 255, 255, 0.05);
 }
 
-.screen-content > * {
+.orb-screen-content > * {
     pointer-events: auto;
 }
 
-.screen-stacked-group {
-    /** son varios screen contents que se muestran uno encima del otro, como overlays **/    
+.orb-screen-stacked-group {
+    /** son varios orb-screen contents que se muestran uno encima del otro, como overlays **/    
     display: block;
     height: 100%;
     width: min(680px, 100%);
@@ -46,7 +46,7 @@
     box-sizing: border-box;
 }
 
-.screen-stacked-group > .screen-content {
+.orb-screen-stacked-group > .orb-screen-content {
     position: absolute;
     inset: 0;
     display: flex;

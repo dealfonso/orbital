@@ -109,13 +109,13 @@ export class ModalDialog {
 
             // Attach the click event listener to the button
             if (actionHandler) {
-                button._jwg = {
+                button._orb = {
                     handler: (event) => {
                         event.preventDefault();
                         actionHandler.call(this);
                     }
                 };
-                button.addEventListener("click", button._jwg.handler);
+                button.addEventListener("click", button._orb.handler);
             }
         });
 
@@ -134,7 +134,7 @@ export class ModalDialog {
      */
     _dispatchEvent(eventName) {
         // We'll add a reference to the modal dialog instance in the event detail, so that event listeners can access it if needed.
-        const event = new CustomEvent(`jwg-modal-${eventName}`, {
+        const event = new CustomEvent(`orb-modal-${eventName}`, {
             bubbles: true,
             cancelable: true,
             detail: { modal: this }
@@ -184,8 +184,8 @@ export class ModalDialog {
         }
         if (this._actionButtons) {
             this._actionButtons.forEach(button => {
-                if (button._jwg && button._jwg.handler) {
-                    button.removeEventListener("click", button._jwg.handler);
+                if (button._orb && button._orb.handler) {
+                    button.removeEventListener("click", button._orb.handler);
                 }
             });
         }
@@ -199,7 +199,7 @@ export class ModalDialog {
      * @param {string} selector 
      * @param {Object} options 
      */
-    static initModals(selector = ".jwg-modal", options = {}) {
+    static initModals(selector = ".orb-modal", options = {}) {
         const modalElements = document.querySelectorAll(selector);
         modalElements.forEach(modalElement => {
             new ModalDialog(modalElement, options);

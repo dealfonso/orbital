@@ -4,75 +4,75 @@
     --scale-factor: 0.1; /* Factor de escala para los efectos de rebote */
     --shake-distance: 5px; /* Distancia de desplazamiento para el efecto de sacudida */
 }
-.jwg-effects {
+.orb-effects {
     animation: var(--fade-animation, none), var(--slide-animation, none), var(--scale-animation, none), var(--shake-animation, none), var(--rotate-center-animation, none);
 }
-.jwg-fade-in {
+.orb-fade-in {
     --fade-animation: fadeIn var(--animation-duration, 0.22s) ease;
 }
-.jwg-fade-out {
+.orb-fade-out {
     --fade-animation: fadeOut var(--animation-duration, 0.22s) ease;
 }
-.jwg-fade-in-before {
+.orb-fade-in-before {
     --fade-animation: fadeInBefore var(--animation-duration, 0.22s) ease;
 }
-.jwg-fade-out-before {
+.orb-fade-out-before {
     --fade-animation: fadeOutBefore var(--animation-duration, 0.22s) ease;
 }
-.jwg-slide-up {
+.orb-slide-up {
     --slide-animation: slideUp var(--animation-duration, 0.22s) ease;
 }
-.jwg-slide-down {
+.orb-slide-down {
     --slide-animation: slideDown var(--animation-duration, 0.22s) ease;
 }
-.jwg-slide-left {
+.orb-slide-left {
     --slide-animation: slideLeft var(--animation-duration, 0.22s) ease;
 }
-.jwg-slide-right {
+.orb-slide-right {
     --slide-animation: slideRight var(--animation-duration, 0.22s) ease;
 }
-.jwg-scale-up {
+.orb-scale-up {
     --scale-animation: scaleUp var(--animation-duration, 0.22s) ease;
 }
-.jwg-scale-down {
+.orb-scale-down {
     --scale-animation: scaleDown var(--animation-duration, 0.22s) ease;
 }
-.jwg-scale-bounce {
+.orb-scale-bounce {
     --scale-factor: 0.1; /* Factor de escala para el efecto de rebote */
     --scale-animation: scaleBounce var(--animation-duration, 0.22s) ease;
 }
-.jwg-effect-strong {
+.orb-effect-strong {
     --shake-distance: 10px; /* Distancia de desplazamiento para el efecto de sacudida fuerte */
     --scale-factor: 0.2; /* Factor de escala para el efecto de rebote fuerte */
     --slide-distance: calc(var(--slide-distance, 60px) * 1.5); /* Distancia de desplazamiento para los efectos fuertes */
 }
-.jwg-effect-weak {
+.orb-effect-weak {
     --shake-distance: 2px; /* Distancia de desplazamiento para el efecto de sacudida débil */
     --scale-factor: 0.05; /* Factor de escala para el efecto de rebote débil */
     --slide-distance: calc(var(--slide-distance, 60px) * 0.5); /* Distancia de desplazamiento para los efectos débiles */
 }
-.jwg-shake {
+.orb-shake {
     animation: shake var(--animation-duration, 0.22s) ease-in-out;
 }
-.jwg-shake.fast {
+.orb-shake.fast {
     animation-duration: 0.25s; /* Duración de la animación para el efecto de sacudida rápida */
 }
-.jwg-shake.slow {
+.orb-shake.slow {
     animation-duration: 1s; /* Duración de la animación para el efecto de sacudida lenta */
 }
-.jwg-shake.fast {
+.orb-shake.fast {
     --animation-duration: 0.20s; /* Duración de la animación para el efecto rápido */
 }
-.jwg-shake.very-fast {
+.orb-shake.very-fast {
     --animation-duration: 0.10s; /* Duración de la animación para el efecto muy rápido */
 }
-.jwg-shake.slow {
+.orb-shake.slow {
     --animation-duration: 1s; /* Duración de la animación para el efecto lento */
 }
-.jwg-very-slow {
+.orb-very-slow {
     --animation-duration: 2s; /* Duración de la animación para el efecto muy lento */
 }
-.jwg-rotate-in-center {
+.orb-rotate-in-center {
     --rotate-center-animation: rotateInCenter var(--animation-duration, 0.22s) ease;
 }
 @keyframes shake {

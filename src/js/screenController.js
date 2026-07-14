@@ -1,4 +1,4 @@
-export class GameController {
+export class ScreenController {
     constructor() {
         this.screens = {};
         this.stack = [];
