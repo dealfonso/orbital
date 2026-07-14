@@ -1,17 +1,30 @@
-import { snakeCaseToCamelCase } from "./utils.js";
+import { snakeCaseToCamelCase, escapeCssValue } from "./utils.js";
 
 const defaultOptions = {
     // The CSS class to add to the container when the screen is shown. You can use this class to define the styles for the visible state of the screen, such as display: block or opacity: 1.
     visibleClass: "active",
     // The CSS class to add to the container when the screen is hidden. You can use this class to define the styles for the hidden state of the screen, such as display: none or opacity: 0.
     hiddenClass: "not-active",
+    // Scope used to resolve UI elements declared in uiElementIds.
+    // - "container": resolve inside this.container first (recommended)
+    // - "document": resolve globally in the whole document
+    scope: "container",
+    // Backward-compatible fallback. If an element is not found in container scope,
+    // it will be searched globally by id.
+    allowGlobalIdFallback: false,
+    // If true, try data-ui first and id second when resolving uiElementIds.
+    preferDataUi: false,
 };
+
+function isElement(value) {
+    return value && typeof value === "object" && value.nodeType === Node.ELEMENT_NODE;
+}
 
 export class BaseScreen {
     /**
-     * Create a new screen instance. The screen will be rendered inside the container with the given ID. Optionally, you can 
+    * Create a new screen instance. The screen will be rendered inside the provided container element. Optionally, you can 
      *  provide an array of UI element IDs to acquire and bind to this screen for easy access.
-     * @param {string} baseContainerId 
+     * @param {HTMLElement} baseContainer container element for this screen.
      * @param {Array<string>} uiElementIds list of element IDs to acquire and bind to this screen. For example: ["start-btn", "score-display"]
      *          The keys will be used as property names in this._el. For example, if you acquire "start-btn", you can access it later with 
      *          this._el["start-btn"] or this._el.startBtn.
@@ -21,17 +34,50 @@ export class BaseScreen {
      *          The keys will be stored as property names in this._els, as Arrays[HTMLElement]. So that you can access them later with 
      *          this._els.startBtn or this._els["startBtn"] or this._els["modeButtons"]. Each of them will be an array of elements matching the selector). This is useful for acquiring multiple elements with the same class or data attribute, such as buttons for different game modes.
      */
-    constructor(controller, baseContainerId, uiElementIds = [], uiElementSelectors = {}, options = {}) {
+    constructor(controller, baseContainer, uiElementIds = [], uiElementSelectors = {}, options = {}) {
         this.controller = controller;
-        this.container = document.getElementById(baseContainerId);
+        this.options = { ...defaultOptions, ...options };
+        this.container = isElement(baseContainer) ? baseContainer : null;
         if (!this.container) {
-            throw new Error(`Container with id "${baseContainerId}" not found`);
+            throw new Error("BaseScreen expects an HTMLElement as the container argument");
         }
-        this._baseContainerId = baseContainerId;
+        this._baseContainer = baseContainer;
         this.acquireElements(uiElementIds);
         this.acquireElementsBySelector(uiElementSelectors);
-        this.options = { ...defaultOptions, ...options };
         this._initialized = false;
+    }
+
+    findElementInContainerById(id) {
+        const escapedId = escapeCssValue(id);
+        return this.container.querySelector(`#${escapedId}`);
+    }
+
+    findElementInContainerByDataUi(key) {
+        const escapedKey = escapeCssValue(key);
+        return this.container.querySelector(`[data-ui="${escapedKey}"]`);
+    }
+
+    resolveElement(key) {
+        const searchInContainer = this.options.scope !== "document";
+        const preferDataUi = this.options.preferDataUi;
+
+        if (searchInContainer) {
+            const byDataUi = this.findElementInContainerByDataUi(key);
+            const byId = this.findElementInContainerById(key);
+            const inContainer = preferDataUi ? (byDataUi || byId) : (byId || byDataUi);
+            if (inContainer) {
+                return inContainer;
+            }
+        }
+
+        if (this.options.scope === "document" || this.options.allowGlobalIdFallback) {
+            const globalElement = document.getElementById(key);
+            if (globalElement) {
+                return globalElement;
+            }
+        }
+
+        return null;
     }
 
     /**
@@ -89,9 +135,9 @@ export class BaseScreen {
     bindElements(elementIds = []) {
         const elements = {};
         for (const id of elementIds) {
-            const el = document.getElementById(id);
+            const el = this.resolveElement(id);
             if (!el) {
-                console.warn(`Element with id "${id}" not found`);
+                console.warn(`Element "${id}" not found in scope "${this.options.scope}"`);
             }
             elements[id] = el;
         }

@@ -69,3 +69,72 @@ export function getValueWithVariance(base, variance = 0) {
     return base + randomVariance;
 }
 
+export function escapeCssValue(value) {
+    if (typeof CSS !== "undefined" && typeof CSS.escape === "function") {
+        return CSS.escape(value);
+    }
+    return String(value).replace(/\\/g, "\\\\").replace(/\"/g, '\\\"');
+}
+
+function getNearestDataUiAncestor(element) {
+    const parent = element.parentElement;
+    return parent ? parent.closest("[data-ui]") : null;
+}
+
+function findScopedUIElement(part, root) {
+    const escapedPart = escapeCssValue(part);
+    const candidates = root.querySelectorAll(`[data-ui="${escapedPart}"]`);
+
+    for (const candidate of candidates) {
+        // Enforce hierarchy: the nearest data-ui ancestor must be the current root.
+        // - If root has data-ui, candidate must belong to that branch.
+        // - If root has no data-ui (e.g. document/body/container), candidate must
+        //   be a top-level data-ui node in that scope.
+        const nearestDataUiAncestor = getNearestDataUiAncestor(candidate);
+        if (nearestDataUiAncestor === root) {
+            return candidate;
+        }
+        if (root === document && nearestDataUiAncestor === null) {
+            return candidate;
+        }
+    }
+
+    return null;
+}
+
+/**
+ * Finds a UI element by its data-ui attribute within a specified root element. The UI is written in the form of
+ *   data-ui="element-id.sub-element-id" where the dot notation indicates a hierarchy of elements. The function 
+ *   will traverse the DOM tree starting from the root element and return the first matching element.
+ * @param {string} uiId - The UI identifier in dot notation (e.g., "menu.button").
+ * @param {HTMLElement} root - The root element to start the search from. Defaults to document.
+ * @returns {HTMLElement|null} The found element or null if not found.
+ * 
+ * Example usage:
+ *  const button = findUIElement("menu.button");
+ */
+export function findUIElement(uiId, root = document) {
+    // First we split the uiId into parts based on the dot notation
+    const parts = uiId.split(".");
+    let currentRoot = root;
+
+    // To keep the structure, we need to make sure that if a child element has a data-ui attribute, it is
+    //   always used to reference the element.
+    // E.g., if we have a structure like:
+    // <div data-ui="menu">
+    //   <div data-ui="panel">
+    //      <div data-ui="button">Click me</div>
+    //   </div>
+    // </div>
+    // We must use menu.panel.button to find the button, and not just panel.button, because panel is a child of menu.
+
+    for (const part of parts) {
+        const foundElement = findScopedUIElement(part, currentRoot);
+        if (!foundElement) {
+            return null; // If any part is not found, return null
+        }
+        currentRoot = foundElement; // Move down the hierarchy
+    }
+
+    return currentRoot; // Return the final found element
+}

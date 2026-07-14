@@ -85,7 +85,7 @@ export class I18n {
 
     // If the current language is not set, set it to the first available language
     if (!this.currentLanguage || !this.translations[this.currentLanguage]) {
-      this.currentLanguage = Object.keys(this.translations)[0];
+      this.currentLanguage = Object.keys(this.translations)[0] || null;
     }
   }
 
@@ -110,11 +110,14 @@ export class I18n {
    * @param {string} lang - The language code to apply.
    * @param {Object} vars - Variables to replace in the translated strings.
    * @param {Array<HTMLElement>} nodes - The HTML elements to apply translations to.
+   * @param {HTMLElement} scope - The root element to search within. Defaults to document.
    */
-  applyTranslations(lang, vars = {}, nodes = null) {
-    document.documentElement.lang = lang;
+  applyTranslations(lang, vars = {}, nodes = null, scope = document) {
+
+    if (lang === null) return;
+    scope.documentElement.lang = lang;
     if (!nodes) {
-      nodes = document.querySelectorAll("[data-i18n]");
+      nodes = scope.querySelectorAll("[data-i18n]");
     }
     nodes.forEach((node) => {
       const key = node.getAttribute("data-i18n");
@@ -139,7 +142,7 @@ export class I18n {
     
     if (!this.getSupportedLanguages().includes(lang)) {
       console.warn(`Language "${lang}" is not supported. Falling back to default language.`);
-      lang = this.getSupportedLanguages()[0];
+      lang = this.getSupportedLanguages()[0] || null;
     }
     this.currentLanguage = lang;
     this.applyTranslations(lang);
@@ -148,11 +151,13 @@ export class I18n {
   /**
    * Extracts all strings from the HTML that have a data-i18n attribute and returns them as an object.
    *   This can be used to generate a base translation file.
+   * @param {NodeList|Array<HTMLElement>} nodes - The HTML elements to extract strings from. If null, it will search the entire document.
+   * @param {HTMLElement} scope - The root element to search within. Defaults to document.
    * @returns {Object} An object where keys are the values of data-i18n attributes and values are the text content of the elements.
    */
-  extractStringsFromHTML(nodes = null) {
+  extractStringsFromHTML(nodes = null, scope = document) {
     if (!nodes) {
-      nodes = document.querySelectorAll("[data-i18n]");
+      nodes = scope.querySelectorAll("[data-i18n]");
     }
     const extracted = {};
     nodes.forEach((node) => {
@@ -186,6 +191,13 @@ export class I18n {
   t(key, vars = {}, lang = null) {
     if (!lang) {
       lang = this.currentLanguage;
+    }
+    if (!lang) {
+      let value = key;
+      if (this.options.missingKeyCallback && typeof this.options.missingKeyCallback === "function") {
+        value = this.options.missingKeyCallback(key, null);
+      }
+      return value;
     }
 
     let dict = {};

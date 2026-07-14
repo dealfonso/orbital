@@ -1,6 +1,6 @@
 {
   "name": "jwg",
-  "version": "1.0.1",
+  "version": "1.1.0",
   "description": "JWG is a set of helpers to build HTML/CSS/JavaScript web games with screen navigation, state management and i18n.",
   "type": "module",
   "main": "./dist/index.js",

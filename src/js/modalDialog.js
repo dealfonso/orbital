@@ -6,10 +6,9 @@ const defaultOptions = {
     selectorModalButton: "[data-modal-action]",
     onClose: null, // Callback function to be called when the modal is closed
 
-    // When we define a "data-modal-action='xxx'" attribute, we are defining that a button inside the modal will trigger a specific action. If the
-    //  value of data-modal-button starts with "javascript:", the rest of the string will be evaluated as JavaScript code when the button is clicked.
-    //  If it does not start with "javascript:", the value will be treated as a key to look up in the buttonActions object, which is defined below. 
-    //  The buttonActions object maps the "xxx" value to a function that will be executed when the button is clicked.
+    // When we define a "data-modal-action='custom-action'" attribute, we are defining that a button inside the modal will trigger a specific action.
+    //  The value will be treated as a key to look up in the buttonActions object, which is defined below. The buttonActions object maps the "custom-action" 
+    //  value to a function that will be executed when the button is clicked.
     buttonActions: {
     }
 };
@@ -82,19 +81,7 @@ export class ModalDialog {
 
             // Determine the action to take when the button is clicked
             let actionHandler = null;
-            if (actionKey.startsWith("javascript:")) {
-                // If the actionKey starts with "javascript:", evaluate the rest of the string as JavaScript code
-                const jsCode = actionKey.substring("javascript:".length);
-                actionHandler = function() {
-                    try {
-                        const fnc = new Function(jsCode);
-                        fnc.call(this);
-                        this._dispatchEvent(`action-${actionKey}`);
-                    } catch (error) {
-                        console.error(`Error executing JavaScript code for modal button "${actionKey}":`, error);
-                    }
-                };
-            } else if (this.options.buttonActions[actionKey]) {
+            if (this.options.buttonActions[actionKey]) {
                 // If the actionKey is defined in buttonActions, use the corresponding function
                 actionHandler = function() {
                     this.options.buttonActions[actionKey]();
@@ -117,14 +104,6 @@ export class ModalDialog {
                 button.addEventListener("click", button._jwg.handler);
             }
         });
-
-        // Attach the click event listener to the close button
-        if (this._closeButton) {
-            this._closeButton.addEventListener("click", (event) => {
-                event.preventDefault();
-                this.close();
-            });
-        }
 
         this._el.classList.add(this.options.visibleClass);
         this._el.classList.remove(this.options.hiddenClass);
@@ -189,11 +168,16 @@ export class ModalDialog {
         // Dispatch a custom event to notify that the modal has been closed
         this._dispatchEvent("hidden");
     }
-}
 
-document.addEventListener("DOMContentLoaded", () => {
-    const modalElements = document.querySelectorAll(".jwg-modal");
-    modalElements.forEach(modalElement => {
-        new ModalDialog(modalElement);
-    });
-});
+    /**
+     * Initializes all modal dialogs on the page with the specified selector and options.
+     * @param {string} selector 
+     * @param {Object} options 
+     */
+    static initModals(selector = ".jwg-modal", options = {}) {
+        const modalElements = document.querySelectorAll(selector);
+        modalElements.forEach(modalElement => {
+            new ModalDialog(modalElement, options);
+        });
+    }
+}
