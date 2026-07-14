@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#162a25">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Reaction Training">
+  <meta name="mobile-web-app-capable" content="yes">  
+  <title>Orbital example</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@icon/themify-icons@1.0.1-alpha.3/themify-icons.min.css"> 
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Changa+One:ital@0;1&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Righteous&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="./stars.css">
+  <!-- <link rel="stylesheet" href="./src/style.css"> -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/dealfonso/Orbital@main/dist/style.css">
+  <style>
+  :root{
+    --bg-1:#150A2E;
+    --bg-2:#2A1458;
+    --bg-3:#3D1E6E;
+    --text: #F5F1FF;
+    --text-dim: rgba(245,241,255,0.62);
+  }
+  html, body {
+    margin: 0;
+    padding: 0;
+    font-family: 'Nunito', sans-serif;
+    height: 100%;
+    width: 100%;
+  }
+  body {
+    background:
+      radial-gradient(60% 45% at 80% 8%, rgba(200,95,255,0.25), transparent 60%),
+      radial-gradient(55% 40% at 10% 85%, rgba(63,224,201,0.14), transparent 60%),
+      linear-gradient(160deg, var(--bg-1), var(--bg-2) 55%, var(--bg-3));
+    color: var(--text);
+  }
+  /* ---------- starfield ---------- */
+  #stars { position: fixed; inset: 0; z-index: -1; overflow: hidden; pointer-events: none; }
+  .little-star {
+    position:absolute; width:2px; height:2px; border-radius:50%;
+    background:#fff; opacity:.5;
+    animation: twinkle 3.2s ease-in-out infinite;
+  }
+  @keyframes twinkle{ 0%,100%{opacity:.15; transform:scale(1);} 50%{opacity:.9; transform:scale(1.6);} }
+  .mt-auto {
+      margin-top: auto;
+  }
+  .mt-1 {
+      margin-top: 1rem;
+  }
+  /** ---------- welcome screen ---------- */
+  .logo {
+    width: 120px;
+    height: 120px;
+    position: relative;
+    font-size: 120px;
+  }
+  .welcome-card {
+      gap: 14px;
+      align-items: center;
+      justify-content: center;
+      width: 12rem;
+      display: flex;
+      flex-direction: column;
+      margin: auto;
+  }
+
+  .welcome-card * {
+    margin: 0;
+  }
+  .welcome-card h1, .welcome-card p {
+      max-width: 20rem;
+      text-align: center;
+  }
+  /** ---------- menu screen ---------- */
+  .menu-list {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+      padding-inline-start: 0;
+  }
+  .menu-item {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 2rem;
+      border-radius: 1rem;
+      cursor: pointer;
+      border: 2px solid rgba(255, 255, 255, 0.1);
+      background-color: rgba(255, 255, 255, 0.05);
+  }
+  .menu-item:hover {
+      background-color: rgba(255, 255, 255, 0.1);
+  }
+  /** ---------- cabecera ---------- */  
+  header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1rem;
+  }
+  /** ---------- utilidades ---------- */
+  .mx-auto {
+      margin-left: auto;
+      margin-right: auto;
+  }
+  .mt-auto {
+      margin-top: auto;
+  }
+  .mb-auto {
+      margin-bottom: auto;
+  }
+  .hidden {
+      display: none !important;
+      pointer-events: none !important;
+  }
+  /** ---------- cubo ---------- */
+  .cubo-marcador {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 1.5rem;
+      width: 100%;
+      text-align: center;
+  }
+  .cubo-marcador_label {
+      font-size: 0.75rem;
+      color: #666666;
+  }
+  .cubo-marcador_valor {
+      font-size: 1.5rem;
+      font-weight: bold;
+
+  }
+  .cubo-marcador_item {
+      border: 1px solid #cccccc;
+      border-radius: 0.5rem;
+      padding: 0.5rem 1rem;
+  }  
+  .cubo-container {
+      width: 100%;
+      margin-bottom: 1rem;
+  }
+  </style>
+</head>
+<body>
+  <div id="stars"></div>  
+  <main id="app-shell" class="orb-app-shell">
+    <section data-ui="welcome-screen" class="orb-screen orb-effects orb-scale-up orb-fade-in">
+      <div class="orb-screen-content">
+        <div class="welcome-card">
+          <div class="logo" aria-hidden="true">
+            😀
+          </div>
+          <h1 class="app-title" data-i18n="game.title">Aplicacion de ejemplo</h1>
+          <p data-i18n="game.subtitle">Esta es una aplicación de ejemplo para demostrar el funcionamiento de Orbital</p>
+        </div>
+      </div>
+    </section>
+    <section data-ui="menu-screen" class="orb-screen not-active orb-effects orb-slide-left orb-fade-in">
+      <div class="menu-wrapper orb-screen-content">
+        <header class="panel-header">
+          <div>
+              <h2 data-i18n="menu.title">Selecciona una demo</h2>
+          </div>
+          <button data-ui="menu-options-btn" class="orb-btn icon-btn"><i class="ti ti-settings"></i></button>
+        </header>
+        <div class="menu-content">
+          <ul class="menu-list">
+            <li class="menu-item" data-i18n="menu.cubo" data-ui="menu-cubo">Cubo runner</li>
+            <li class="menu-item" data-i18n="menu.stars" data-ui="menu-stars">Stars</li>
+            <li class="menu-item" data-i18n="menu.fireworks" data-ui="menu-fireworks">Fireworks</li>
+          </ul>
+      </div>
+    </section>
+    <section data-ui="cubo-screen" class="orb-screen not-active orb-effects orb-slide-left orb-fade-in">
+      <div class="orb-screen-stacked-group">
+        <div class="orb-screen-content">
+          <div data-ui="cubo-marcador" class="cubo-marcador mt-auto">
+            <div class="cubo-marcador_item">
+              <div class="cubo-marcador_label" data-i18n="cubo.puntos">Puntos</div>
+              <div data-ui="cubo-marcador_puntos" class="cubo-marcador_valor">0</div>
+            </div>
+            <div class="cubo-marcador_item">
+              <div class="cubo-marcador_label" data-i18n="cubo.mejor">Mejor</div>
+              <div data-ui="cubo-marcador_mejor" class="cubo-marcador_valor">0</div>
+            </div>
+          </div>
+          <div data-ui="cubo-container" class="cubo-container mt-1">
+          </div>
+          <div class="button-group mb-auto mt-1">
+            <button data-ui="cubo-jump" class="orb-btn icon-btn xxl hidden"><i class="ti ti-arrow-up"></i></button>
+            <button data-ui="cubo-restart" class="orb-btn icon-btn xxl hidden"><i class="ti ti-reload"></i></button>
+            <button data-ui="cubo-play" class="orb-btn icon-btn xxl"><i class="ti ti-control-play"></i></button>
+          </div>
+        </div>
+        <div class="orb-screen-content">
+          <div class="button-group mx-auto mt-auto">
+            <button data-ui="cubo-back-btn" class="orb-btn icon-btn"><i class="ti ti-arrow-left"></i></button>
+          </div>
+        </div>
+      </div>
+    </section>
+    <section data-ui="fireworks-screen" class="orb-screen not-active orb-effects orb-slide-left orb-fade-in">
+      <div class="orb-screen-stacked-group">
+        <div data-ui="fireworks-container" class="orb-screen-content">
+        </div>
+        <div class="orb-screen-content">
+          <div class="orb-button-group mx-auto mt-auto">
+            <button data-ui="fireworks-back-btn" class="orb-btn icon-btn"><i class="ti ti-arrow-left"></i></button>
+            <button data-ui="fireworks-reload-btn" class="orb-btn icon-btn"><i class="ti ti-reload"></i></button>
+          </div>
+        </div>
+      </div>
+    </section>
+    <section data-ui="stars-screen" class="orb-screen not-active orb-effects orb-slide-left orb-fade-in">
+      <div class="orb-screen-stacked-group">
+        <div data-ui="stars-container" class="orb-screen-content bg-stars">
+        </div>
+        <div class="orb-screen-content">
+          <div class="orb-button-group mx-auto mt-auto">
+            <button data-ui="stars-back-btn" class="orb-btn icon-btn"><i class="ti ti-arrow-left"></i></button>
+            <button data-ui="stars-reload-btn" class="orb-btn icon-btn"><i class="ti ti-reload"></i></button>
+          </div>
+        </div>
+      </div> 
+    </section>
+  </main>
+  <script src="https://cdn.jsdelivr.net/npm/fireworks-js@2.x/dist/index.umd.js"></script>  
+  <script type="module" src="./app.js"></script>
+</body>
+</html>

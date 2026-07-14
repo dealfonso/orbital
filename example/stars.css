@@ -1,0 +1,54 @@
+/** estilos para las estrellas de fondo **/
+.bg-stars {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+    pointer-events: none;
+    z-index: 1;
+}
+
+.star {
+    position: absolute;
+    /* El truco principal: crea las curvas hacia adentro */
+    clip-path: polygon(50% 0%, 61% 39%, 100% 50%, 61% 61%, 50% 100%, 39% 61%, 0% 50%, 39% 39%);
+}
+.star::before {
+    content: '';
+    display: block;
+    background-color: var(--star-color, #fff);
+    animation: twinkle var(--d, 3s) ease-in-out infinite var(--delay, 0s);
+}
+
+.star.outline {
+    background-color: transparent;
+    border: var(--star-border-width, 2px) solid var(--star-color, #fff);
+}
+.star.small::before {
+    width: 10px;
+    height: 10px;
+    --op: 0.15;
+}
+.star.medium::before {
+    width: 20px;
+    height: 20px;
+    --op: 0.3;
+}
+.star.large::before {
+    width: 30px;
+    height: 30px;
+    --op: 0.5;
+}
+
+@keyframes twinkle {
+    0%,
+    100% {
+        opacity: 0;
+        transform: scale(0.6);
+    }
+
+    50% {
+        opacity: var(--op, 0.3);
+        transform: scale(1);
+    }
+}
+/** ----------------- */
