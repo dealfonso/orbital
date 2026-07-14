@@ -103,15 +103,26 @@ function findScopedUIElement(part, root) {
 }
 
 /**
- * Finds a UI element by its data-ui attribute within a specified root element. The UI is written in the form of
- *   data-ui="element-id.sub-element-id" where the dot notation indicates a hierarchy of elements. The function 
- *   will traverse the DOM tree starting from the root element and return the first matching element.
- * @param {string} uiId - The UI identifier in dot notation (e.g., "menu.button").
- * @param {HTMLElement} root - The root element to start the search from. Defaults to document.
- * @returns {HTMLElement|null} The found element or null if not found.
- * 
+ * Finds a UI element by traversing a hierarchy of data-ui segments within a specified root.
+ * Each segment is resolved against descendant elements using independent data-ui values, not
+ * a single dotted data-ui attribute.
+ *
+ * Example structure:
+ * <section data-ui="menu">
+ *   <div data-ui="panel">
+ *     <button data-ui="play">Play</button>
+ *   </div>
+ * </section>
+ *
  * Example usage:
- *  const button = findUIElement("menu.button");
+ *  findUIElement("menu.panel.play")
+ *
+ * The hierarchy is strict for data-ui ancestors: if an intermediate ancestor has data-ui, it
+ * must appear in the path. Non-semantic wrapper elements without data-ui may be skipped.
+ *
+ * @param {string} uiId - The UI path in dot notation.
+ * @param {HTMLElement|Document} root - The root node to start the search from. Defaults to document.
+ * @returns {HTMLElement|null} The found element or null if not found.
  */
 export function findUIElement(uiId, root = document) {
     // First we split the uiId into parts based on the dot notation

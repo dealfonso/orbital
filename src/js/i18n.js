@@ -33,7 +33,7 @@ export class I18n {
     this.translations = {};
     this.collectedStrings = {};
     this.currentLanguage = null;
-    this.options = { ...options };
+    this.options = { ...I18n.defaultOptions, ...options };
   }
 
   /**
@@ -115,7 +115,10 @@ export class I18n {
   applyTranslations(lang, vars = {}, nodes = null, scope = document) {
 
     if (lang === null) return;
-    scope.documentElement.lang = lang;
+    const documentRoot = scope.nodeType === Node.DOCUMENT_NODE ? scope : scope.ownerDocument;
+    if (documentRoot?.documentElement) {
+      documentRoot.documentElement.lang = lang;
+    }
     if (!nodes) {
       nodes = scope.querySelectorAll("[data-i18n]");
     }

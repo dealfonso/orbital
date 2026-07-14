@@ -5,14 +5,14 @@ const defaultOptions = {
     visibleClass: "active",
     // The CSS class to add to the container when the screen is hidden. You can use this class to define the styles for the hidden state of the screen, such as display: none or opacity: 0.
     hiddenClass: "not-active",
-    // Scope used to resolve UI elements declared in uiElementIds.
+    // Scope used to resolve UI elements declared in uiKeys.
     // - "container": resolve inside this.container first (recommended)
     // - "document": resolve globally in the whole document
     scope: "container",
     // Backward-compatible fallback. If an element is not found in container scope,
     // it will be searched globally by id.
     allowGlobalIdFallback: false,
-    // If true, try data-ui first and id second when resolving uiElementIds.
+    // If true, try data-ui first and id second when resolving uiKeys.
     preferDataUi: false,
 };
 
@@ -23,10 +23,11 @@ function isElement(value) {
 export class BaseScreen {
     /**
     * Create a new screen instance. The screen will be rendered inside the provided container element. Optionally, you can 
-     *  provide an array of UI element IDs to acquire and bind to this screen for easy access.
+    *  provide an array of UI keys to acquire and bind to this screen for easy access.
      * @param {HTMLElement} baseContainer container element for this screen.
-     * @param {Array<string>} uiElementIds list of element IDs to acquire and bind to this screen. For example: ["start-btn", "score-display"]
-     *          The keys will be used as property names in this._el. For example, if you acquire "start-btn", you can access it later with 
+    * @param {Array<string>} uiKeys list of UI keys to acquire and bind to this screen. For example: ["start-btn", "score-display"]
+    *          UI keys are resolved inside the container, preferring id or data-ui according to options.preferDataUi.
+    *          The keys will be used as property names in this._el. For example, if you acquire "start-btn", you can access it later with 
      *          this._el["start-btn"] or this._el.startBtn.
      * @param {Dict<string, string>} uiElementSelectors optional dictionary of element selectors to acquire and bind to this screen. 
      *          For example: { "startBtn": "#start-btn", "modeButtons": ".mode-btn" }
@@ -34,7 +35,7 @@ export class BaseScreen {
      *          The keys will be stored as property names in this._els, as Arrays[HTMLElement]. So that you can access them later with 
      *          this._els.startBtn or this._els["startBtn"] or this._els["modeButtons"]. Each of them will be an array of elements matching the selector). This is useful for acquiring multiple elements with the same class or data attribute, such as buttons for different game modes.
      */
-    constructor(controller, baseContainer, uiElementIds = [], uiElementSelectors = {}, options = {}) {
+    constructor(controller, baseContainer, uiKeys = [], uiElementSelectors = {}, options = {}) {
         this.controller = controller;
         this.options = { ...defaultOptions, ...options };
         this.container = isElement(baseContainer) ? baseContainer : null;
@@ -42,7 +43,7 @@ export class BaseScreen {
             throw new Error("BaseScreen expects an HTMLElement as the container argument");
         }
         this._baseContainer = baseContainer;
-        this.acquireElements(uiElementIds);
+        this.acquireElements(uiKeys);
         this.acquireElementsBySelector(uiElementSelectors);
         this._initialized = false;
     }
@@ -126,20 +127,21 @@ export class BaseScreen {
     }
 
     /**
-     * Bind multiple elements by their IDs. The elements should be inside the container of this screen.
+     * Bind multiple UI elements by key. The elements should be inside the container of this screen.
+     * Keys can resolve to either id or data-ui, with optional document-level id fallback.
      * 
-     * @param {Array<string>} elementIds The IDs of the elements to acquire. For example: ["start-btn", "score-display"]
-     * @returns {Dict<string, HTMLElement>} An object with the acquired elements, keyed by their IDs. For example: 
+     * @param {Array<string>} uiKeys The UI keys of the elements to acquire. For example: ["start-btn", "score-display"]
+     * @returns {Dict<string, HTMLElement>} An object with the acquired elements, keyed by their UI keys. For example: 
      *      { "start-btn": HTMLElement, "score-display": HTMLElement }
      */
-    bindElements(elementIds = []) {
+    bindElements(uiKeys = []) {
         const elements = {};
-        for (const id of elementIds) {
-            const el = this.resolveElement(id);
+        for (const uiKey of uiKeys) {
+            const el = this.resolveElement(uiKey);
             if (!el) {
-                console.warn(`Element "${id}" not found in scope "${this.options.scope}"`);
+                console.warn(`Element "${uiKey}" not found in scope "${this.options.scope}"`);
             }
-            elements[id] = el;
+            elements[uiKey] = el;
         }
         return elements;
     }
@@ -165,14 +167,14 @@ export class BaseScreen {
     }
 
     /**
-     * Acquire and bind multiple elements by their IDs. The elements should be inside the container of this screen.
+     * Acquire and bind multiple UI elements by key. The elements should be inside the container of this screen.
      *   - The acquired elements will be stored in this._el for easy access. For example, if you acquire "start-btn", 
      *     you can access it later with this._el["start-btn"] or this._el.startBtn.
-     * @param {Array<string>} elementIds The IDs of the elements to acquire. For example: ["start-btn", "score-display"]
-     * @returns {Dict<string, HTMLElement>} An object with the acquired elements, keyed by their IDs. For example: { "start-btn": HTMLElement, "score-display": HTMLElement }
+     * @param {Array<string>} uiKeys The UI keys of the elements to acquire. For example: ["start-btn", "score-display"]
+     * @returns {Dict<string, HTMLElement>} An object with the acquired elements, keyed by their UI keys. For example: { "start-btn": HTMLElement, "score-display": HTMLElement }
      */
-    acquireElements(elementIds = []) {
-        const elements = this.bindElements(elementIds);
+    acquireElements(uiKeys = []) {
+        const elements = this.bindElements(uiKeys);
         for (const [key, el] of Object.entries(elements)) {
             const camelCaseKey = snakeCaseToCamelCase(key);
             if (camelCaseKey !== key) {

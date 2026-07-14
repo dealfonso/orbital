@@ -3,6 +3,7 @@ export { I18n } from "./js/i18n.js";
 export { GameController } from "./js/gameController.js";
 export { StateController } from "./js/stateController.js";
 export { ModalDialog } from "./js/modalDialog.js";
+export { findUIElement } from "./js/utils.js";
 
 import { BaseScreen } from "./js/baseScreen.js";
 import { I18n } from "./js/i18n.js";

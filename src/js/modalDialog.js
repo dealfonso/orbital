@@ -17,11 +17,25 @@ export class ModalDialog {
     constructor(el, options = {}) {
         this._el = el;
         this._handlers = {};
+        this._isVisible = false;
         this.options = { ...defaultOptions, ...options };
-        this._el.getAttribute("data-show") === "true" ? this.show() : this.hide();
+        if (this._el.getAttribute("data-show") === "true") {
+            this.show();
+        } else {
+            this._syncHiddenState();
+        }
+    }
+
+    _syncHiddenState() {
+        this._el.classList.remove(this.options.visibleClass);
+        this._el.classList.add(this.options.hiddenClass);
     }
 
     show() {
+        if (this._isVisible) {
+            return false;
+        }
+
         // We are getting the structure so that the modal dialogs can be created or modified dynamically and the structure can be defined in the HTML. 
 
         // Find the close button
@@ -105,11 +119,13 @@ export class ModalDialog {
             }
         });
 
+        this._isVisible = true;
         this._el.classList.add(this.options.visibleClass);
         this._el.classList.remove(this.options.hiddenClass);
 
         // Dispatch a custom event to notify that the modal has been shown
         this._dispatchEvent("shown");
+        return true;
     }
 
     /**
@@ -131,11 +147,14 @@ export class ModalDialog {
      *   it will dispatch a custom "modalClosed" event from the modal element to notify other parts of the application that the modal has been closed.
      */
     close() {
-        this.hide();
+        if (!this.hide()) {
+            return false;
+        }
         if (typeof this.options.onClose === "function") {
             this.options.onClose();
         }
         this._dispatchEvent("closed");
+        return true;
     }
 
     /**
@@ -145,8 +164,13 @@ export class ModalDialog {
      *  Additionally, it will dispatch a custom "modalClosed" event from the modal element.
      */
     hide() {
-        this._el.classList.remove(this.options.visibleClass);
-        this._el.classList.add(this.options.hiddenClass);
+        if (!this._isVisible) {
+            this._syncHiddenState();
+            return false;
+        }
+
+        this._isVisible = false;
+        this._syncHiddenState();
 
         // Remove event listeners to avoid memory leaks
         if (this._closeButton && this._handlers.closeButtonClick) {
@@ -167,6 +191,7 @@ export class ModalDialog {
         }
         // Dispatch a custom event to notify that the modal has been closed
         this._dispatchEvent("hidden");
+        return true;
     }
 
     /**
