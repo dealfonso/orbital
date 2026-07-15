@@ -1,31 +1,31 @@
 :root {
-    --text: #F5F1FF;
-    --text-dim: rgba(245, 241, 255, 0.62);
-    --surface: rgba(255, 255, 255, 0.07);
-    --surface-strong: rgba(255, 255, 255, 0.15);
-    --surface-border: rgba(255, 255, 255, 0.14);
-    --nova: #FF5FA2;
-    --nova-dark: #C93E7B;
-    --nova-shadow: rgba(255, 95, 162, .35);
-    --nova-shadow-dark: rgba(255, 95, 162, .5);
+    --orb-btn-text-color: #F5F1FF;
+    --orb-btn-background: rgba(255, 255, 255, 0.07);
+    --orb-btn-border-strong: rgba(255, 255, 255, 0.15);
+    --orb-btn-border: rgba(255, 255, 255, 0.14);
+    --orb-btn-color: #FF5FA2;
+    --orb-btn-color-light: #FF87BC;
+    --orb-btn-color-dark: #C93E7B;
+    --orb-btn-color-shadow: rgba(255, 95, 162, .35);
+    --orb-btn-color-shadow-dark: rgba(255, 95, 162, .5);
 }
 
 .orb-btn {
-    color: var(--text);
+    color: var(--orb-btn-text-color);
     background: none;
     padding: 12px 22px;
     border-radius: 99px;
-    border: 1px solid var(--surface-border);
-    background: var(--surface);
+    border: 1px solid var(--orb-btn-border);
+    background: var(--orb-btn-background);
 }
 
 .orb-btn:hover {
-    background: var(--surface-strong);
+    background: var(--orb-btn-border-strong);
     cursor: pointer;
 }
 
 .orb-btn:active {
-    background: var(--surface-strong);
+    background: var(--orb-btn-border-strong);
     transform: scale(0.95);
 }
 
@@ -53,20 +53,20 @@
     justify-content: center;
     align-items: center;
 
-    background: linear-gradient(180deg, #FF87BC, var(--nova) 60%, var(--nova-dark));
-    box-shadow: 0 7px 12px var(--nova-shadow);
+    background: linear-gradient(180deg, var(--orb-btn-color-light), var(--orb-btn-color) 60%, var(--orb-btn-color-dark));
+    box-shadow: 0 7px 12px var(--orb-btn-color-shadow);
     transition: transform .08s ease, box-shadow .08s ease;
 }
 .orb-btn.icon-btn:active {
     transform: scale(.9);
-    box-shadow: 0 3px 6px var(--nova-shadow);
+    box-shadow: 0 3px 6px var(--orb-btn-color-shadow);
 }
 .orb-btn.icon-btn:focus {
     outline: none;
-    box-shadow: 0 0 0 3px var(--nova-shadow-dark), 0 7px 12px var(--nova-shadow);
+    box-shadow: 0 0 0 3px var(--orb-btn-color-shadow-dark), 0 7px 12px var(--orb-btn-color-shadow);
 }
 .orb-btn.icon-btn:hover {
-    background-color: var(--nova-dark);
+    background-color: var(--orb-btn-color-dark);
 }
 .orb-btn.icon-btn.xl {
     width: 3.5rem;

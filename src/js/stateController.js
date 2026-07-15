@@ -137,10 +137,24 @@ export class StateController {
         return false;
     }
 
+    /**
+     * Syntactic sugar for registering a callback function to be called when the state changes to the specified state. 
+     *  (see `on` method for more details)
+     * @param {string} state
+     * @param {function(string, string, StateController)} callback
+     * @return {function()} a function that can be called to unregister the callback.
+     */
     onEnter(state, callback) {
         return this.on("enter", state, callback);
     }
 
+    /**
+     * Syntactic sugar for registering a callback function to be called when the state changes from the specified state. 
+     *  (see `on` method for more details)
+     * @param {string} state
+     * @param {function(string, string, StateController)} callback
+     * @return {function()} a function that can be called to unregister the callback.
+     */
     onLeave(state, callback) {
         return this.on("leave", state, callback);
     }

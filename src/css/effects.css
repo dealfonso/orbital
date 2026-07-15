@@ -54,19 +54,19 @@
 .orb-shake {
     animation: shake var(--animation-duration, 0.22s) ease-in-out;
 }
-.orb-shake.fast {
+.orb-fast {
     animation-duration: 0.25s; /* Duración de la animación para el efecto de sacudida rápida */
 }
-.orb-shake.slow {
+.orb-slow {
     animation-duration: 1s; /* Duración de la animación para el efecto de sacudida lenta */
 }
-.orb-shake.fast {
+.orb-fast {
     --animation-duration: 0.20s; /* Duración de la animación para el efecto rápido */
 }
-.orb-shake.very-fast {
+.orb-very-fast {
     --animation-duration: 0.10s; /* Duración de la animación para el efecto muy rápido */
 }
-.orb-shake.slow {
+.orb-slow {
     --animation-duration: 1s; /* Duración de la animación para el efecto lento */
 }
 .orb-very-slow {

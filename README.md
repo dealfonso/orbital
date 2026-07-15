@@ -1,112 +1,84 @@
 ![Orbital logo](img/orbital-logo-p.png)
 
-# Orbital (ORB)
+# Orbital
 
 ORB is a lightweight mini-framework for building interactive applications with HTML, CSS, and JavaScript, designed to run on the web and grow into an installable PWA. Although it started with games in mind, its design works just as well for standard applications with screen-based navigation and state-driven logic.
 
-The core idea is to build the application as a state machine: you do not navigate by showing screens directly, but by changing the application state. That change activates or deactivates screens and defines the allowed navigation paths.
+The core idea is to build the application as a state machine: you do not navigate by showing screens directly, but by changing the application state. That change triggers events that enable to activates or deactivates screens depending on the state, and defines the allowed navigation paths.
 
 This approach keeps behavior predictable, makes the project easier to grow, and reduces UI errors as the application scales.
 
-It includes:
+Orbital is a small framework that provides the following features:
 
-- ScreenController to show, stack, and close screens
-- StateController to model states and transitions
-- BaseScreen to encapsulate the logic of each screen
-- I18n to translate the DOM using data-i18n
-- ModalDialog for simple modals
-- findUIElement to locate elements through hierarchical data-ui selectors
-- Base CSS for the app shell, screens, buttons, effects, and modal
+- `ScreenController` to manage showing and hiding screens, and dealing with the lifecycle of each screen.
+- `StateController` to model states and transitions, taking care of the allowed navigation paths and triggering events when entering or leaving a state.
+- `BaseScreen` which is a class that encapsulates the base logic of each screen, ready to be extended by the developer to implement the specific behavior of each screen.
+- `I18n` to help translating the DOM using a declarative approach with `data-i18n` attributes in HTML elements (appart from enabling programmatical translations).
+- A _base CSS classes_ for the app shell, screens, buttons, effects, and modal, so you can focus on the application logic and not on the boilerplate.
 
 ## Framework vision
 
-- App-first and cross-platform: designed for web experiences that work well on mobile and desktop
-- PWA-ready: a suitable structure for turning the project into an installable app
-- Multi-purpose: useful for games as well as business or utility applications
-- Explicit architecture: decoupled states, transitions, and screens
+- **App-first and cross-platform:** designed for web experiences that work well on mobile and desktop.
+- **PWA-ready:** a suitable structure for turning the project into an installable app.
+- **Multi-purpose:** useful for games as well as business or utility applications.
+- **Explicit architecture:** decoupled states, transitions, and screens.
 
 ## Recommended architecture model
 
-1. Define the application states and their valid transitions
-2. Connect each state to the activation of a screen
-3. Make each screen self-contained in its own lifecycle
-4. Always navigate through state changes, not direct DOM toggles
+1. **Define the application states and their valid transitions:** by using `StateController`, you can define the states and their allowed transitions. This creates a clear map of how the application can move from one state to another.
+2. **Connect each state to the activation of a screen:** the `StateController` triggers events when entering or leaving a state. You can use these events to show or hide screens through the `ScreenController`.
+3. **Each screen self-contained in its own lifecycle:** When a screen is activated, the developer should attach listeners, start timers or animations, and allocate the resources needed for that view. When a screen is deactivated, the developer should detach listeners, stop timers or animations, and release resources to avoid leaks and ghost behavior.
+4. **Always navigate through state changes, not direct DOM toggles:** This ensures that the application flow is predictable and that screens are only shown when the state allows it. Directly manipulating the DOM to show or hide screens can lead to inconsistencies and bugs, especially as the application grows in complexity.
 
-### Key principles
+# Basic Example
 
-- State drives the flow; the UI reacts
-- Screens should not be shown through direct access from anywhere in the code
-- Each screen creates resources when activated and releases them when deactivated
-- Navigation is declarative: only allowed transitions are possible
+If you just want to learn by example, you can follow the steps below to create a minimal application with two screens and navigation between them.
 
-### Screen lifecycle
+## HTML
 
-When a screen is activated:
+Create two screens in HTML with `data-ui` (which is the identifier for the ui elements in the DOM), and use the `orb-screen` class for each screen. The `not-active` class is used to hide screens that are not currently active (any screen should be hidden by default).
 
-- attach listeners
-- start timers or animations
-- allocate the resources needed for that view
-
-When a screen is deactivated:
-
-- detach listeners
-- stop timers or animations
-- release resources to avoid leaks and ghost behavior
-
-This pattern makes screens robust, isolated, and easy to maintain.
-
-## Branding
-
-Official name: Orbital
-
-Why it fits:
-
-- It is short, memorable, and product-like
-- It conveys navigation and movement between screens without sounding technical
-- It is broad enough for games and standard apps
-
-Visual identity:
-
-- Orbital logo with an orbit motif and descriptor: State • Flow • Experience
-
-Codename / acronym: ORB
-
-Naming convention:
-
-- CSS prefix: orb-
-- JS namespace: ORB
-- package name: orbital
-
-## Quick Start (TLDR)
-
-If you just want to get started quickly:
-
-1. Install and load the styles
-
-```bash
-npm install orbital
-```
-
-```js
-import { BaseScreen, ScreenController, StateController, findUIElement } from "orbital";
-import "orbital/style.css";
-```
-
-2. Create two screens in HTML with data-ui
+> The `orb-app-shell` class is the main container that contains the screens (using `orb-screen` class), and each screen needs a `orb-screen-content` element which is the base inner layout for each screen.
 
 ```html
-<main class="orb-app-shell">
-  <section data-ui="menu-screen" class="orb-screen">
-    <button data-ui="go-about">About</button>
-  </section>
-
-  <section data-ui="about-screen" class="orb-screen not-active">
-    <button data-ui="go-back">Back</button>
-  </section>
-</main>
+<html>
+<head>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/dealfonso/Orbital@main/dist/style.css">
+</head>
+<body>
+  <main class="orb-app-shell">
+    <section data-ui="menu-screen" class="orb-screen not-active">
+      <div class="orb-screen-content">
+        <h1>Menu</h1>
+        <button data-ui="go-about">Go to another screen</button>
+      </div>
+    </section>
+    <section data-ui="about-screen" class="orb-screen not-active">
+      <div class="orb-screen-content">
+        <h1>About</h1>
+        <button data-ui="go-back">Back</button>
+      </div>
+    </section>
+  </main>
+</body>
+<script type="module" src="./app.js"></script>
+</html>
 ```
 
-3. Connect state + navigation
+## JavaScript
+
+Create a JavaScript file (e.g., `app.js`) and import the necessary classes from Orbital. Then, define the application state, screens, and their transitions.
+
+```js
+import {
+  BaseScreen,
+  ScreenController,
+  StateController,
+  findUIElement,
+} from "https://cdn.jsdelivr.net/gh/dealfonso/Orbital@main/dist/index.js";
+```
+
+Create a state controller to define the states and their valid transitions. 
 
 ```js
 class AppState extends StateController {
@@ -115,7 +87,15 @@ class AppState extends StateController {
     this.setStateTransitions({ menu: ["about"], about: ["menu"] });
   }
 }
+```
 
+Create the screens by extending `BaseScreen` and implementing the necessary event listeners to handle navigation.
+
+> The library exports the `findUIElement` function to resolve the `data-ui` elements in the DOM.
+
+The `BaseScreen` constructor enables a shorthand to find elements in the DOM by their `data-ui` attribute. The third argument is an array of `uiKeys` that will be resolved inside the screen container, so you can access them later through `this._el.<uiKey>`. In the example below, the `go-about` and `go-back` buttons are resolved and stored in `this._el.goAbout` and `this._el.goBack`, respectively.
+
+```js
 class MenuScreen extends BaseScreen {
   constructor(controller) {
     super(controller, findUIElement("menu-screen"), ["go-about"]);
@@ -133,7 +113,13 @@ class AboutScreen extends BaseScreen {
     this._el.goBack.addEventListener("click", () => this.controller.state.change("menu"));
   }
 }
+```
 
+Finally, create the main application class that extends `ScreenController`, adds the screens, and connects the state transitions to screen visibility.
+
+> Initially the `StateController` will be in a `null` state, so you need to change the state to the initial screen (in this case, `menu`) to show it. As long as the state changes, the corresponding event will be triggered and the screen will be shown.
+
+```js
 class App extends ScreenController {
   constructor() {
     super();
@@ -141,10 +127,10 @@ class App extends ScreenController {
   }
 
   init() {
-    this.addScreen("menu", new MenuScreen(this));
-    this.addScreen("about", new AboutScreen(this));
-    this.state.onEnter("menu", () => this.showScreen("menu"));
-    this.state.onEnter("about", () => this.showScreen("about"));
+    this.add("menu", new MenuScreen(this));
+    this.add("about", new AboutScreen(this));
+    this.state.onEnter("menu", () => this.show("menu"));
+    this.state.onEnter("about", () => this.show("about"));
     this.state.change("menu");
   }
 }
@@ -154,264 +140,238 @@ document.addEventListener("DOMContentLoaded", () => new App().init());
 
 That is enough to get a minimal working app.
 
-## Practical guide
+# API 
 
-## Quick API
+## `ScreenController` class
 
-Quick export reference:
+The `ScreenController` class is responsible for managing the screens in the application. It allows you to add screens, show or hide them, and handle their lifecycle events.
 
-Main exports:
+The `ScreenController` acts as a stack, as in mobile apps you usually navigate through the screens in a stack fashion, so it will keep track of the previous screens and allow you to go back to them if needed. So, it enables the methods
 
-- BaseScreen
-- ScreenController
-- StateController
-- I18n
-- ModalDialog
-- findUIElement
-- ORB (default namespace)
+- `push(screenName, payload)`: to push a new screen onto the stack and show it.
+- `pop(payload)`: to pop the current screen off the stack and return to the previous one (using a `payload` will override the original `payload` used when the screen was pushed).
 
-Quick snippet:
+> the `payload` argument is optional and can be used to pass data between screens when navigating.
 
-```js
-import {
-  BaseScreen,
-  ScreenController,
-  StateController,
-  I18n,
-  ModalDialog,
-  findUIElement,
-} from "orbital";
+In case that you want to reset the stack and go to a specific screen you can use the following method
 
-import "orbital/style.css";
-```
+- `show(screenName, payload)`: to show a specific screen, hiding the current one and clearing the stack. This is useful for scenarios where you want to reset the navigation flow, such as returning to a main menu or starting a new game.
 
-## How to use it
+## `BaseScreen` class
 
-### 1. From npm
+The `BaseScreen` class is a base class for creating screens in the application. It provides a structure for managing the screen's lifecycle, including initialization, event listeners, and cleanup.
 
-```bash
-npm install orbital
-```
+When creating a new screen, you should extend the `BaseScreen` class and implement the necessary logic for that specific screen. The constructor takes three arguments:
+
+- `controller`: the `ScreenController` instance that manages the screens.
+- `element`: the DOM element representing the screen (usually obtained using `findUIElement`).
+- `uiKeys`: an array of keys that correspond to the `data-ui` attributes of the elements within the screen. These keys will be resolved and stored in `this._el` for easy access.
+- `uiElementSelectors`: an optional object that allows you to use custom css selectors to find UI elements. The keys of the objects are names that will be used to access the elements in `this._els`, and the values are the css selectors to find them.
+- `options`: an optional object that allows you to configure the screen behavior:
+  - `visibleClass`: the CSS class to add to the container when the screen is shown. You can use this class to define the styles for the visible state of the screen, such as `display: block` or `opacity: 1`.
+  - `hiddenClass`: the CSS class to add to the container when the screen is hidden. You can use this class to define the styles for the hidden state of the screen, such as `display: none` or `opacity: 0`.
+  - `scope`: the scope used to resolve UI elements declared in `uiKeys`. It can be either `"container"` (resolve inside `this.container` first, recommended) or `"document"` (resolve globally in the whole document).
+  - `allowGlobalIdFallback`: a boolean that enables a compatible fallback. If an element is not found in container scope by using the `data-ui` attribute, it will be searched globally by id.
+  - `preferDataUi`: a boolean that, if true, will try `data-ui` first to resolve `uiKeys`, and html `id` if not found.
+
+Example:
 
 ```js
-import {
-  BaseScreen,
-  ScreenController,
-  StateController,
-  I18n,
-  ModalDialog,
-  findUIElement,
-} from "orbital";
-
-import "orbital/style.css";
+class MenuScreen extends BaseScreen {
+  constructor(controller) {
+    super(controller, findUIElement("menu-screen"), ["go-about"], { buttons: ".orb-btn"});
+  }
+  ...
+}
 ```
 
-You can also use the default namespace:
+In this example, we'll have the possibility to access the `go-about` button through `this._el.goAbout`, and all the buttons inside the screen through `this._els.buttons`.
 
 ```js
-import ORB from "orbital";
-
-const { BaseScreen, ScreenController, StateController, I18n, findUIElement } = ORB;
-```
-
-### 2. From CDN (dist)
-
-```html
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/dealfonso/Orbital@main/dist/style.css">
-<script type="module">
-  import {
-    BaseScreen,
-    ScreenController,
-    StateController,
-    I18n,
-    findUIElement,
-  } from "https://cdn.jsdelivr.net/gh/dealfonso/Orbital@main/dist/index.js";
-</script>
-```
-
-You can pin a specific version by replacing @main with a tag or version.
-
-### 3. From src (local development)
-
-If you are working inside the repository:
-
-```js
-import {
-  BaseScreen,
-  ScreenController,
-  StateController,
-  I18n,
-  findUIElement,
-} from "./src/index.js";
-
-import "./src/style.css";
-```
-
-### 4. dist or src
-
-- dist: ready-to-consume artifacts (ESM bundle + CSS)
-- src: source code for debugging or developing the framework
-
-## Minimal application step by step
-
-Goal: two screens, go forward and back, with the smallest amount of code possible.
-
-### 1) Base HTML
-
-```html
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ORB demo</title>
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/dealfonso/Orbital@main/dist/style.css">
-</head>
-<body>
-  <main class="orb-app-shell">
-    <section data-ui="menu-screen" class="orb-screen orb-effects orb-fade-in">
-      <div class="orb-screen-content">
-        <h1>Menu</h1>
-        <button data-ui="go-about" class="orb-btn">Go to another screen</button>
-      </div>
-    </section>
-
-    <section data-ui="about-screen" class="orb-screen not-active orb-effects orb-slide-left orb-fade-in">
-      <div class="orb-screen-content">
-        <h1>About</h1>
-        <button data-ui="go-back" class="orb-btn">Back</button>
-      </div>
-    </section>
-  </main>
-
-  <script type="module" src="./app.js"></script>
-</body>
-</html>
-```
-
-### 2) HTML structure
-
-- orb-app-shell: main container that stacks screens
-- orb-screen: each screen
-- not-active: hidden screen
-- orb-screen-content: base inner layout
-- orb-screen-stacked-group: variant for content overlays
-
-Each screen should have its own root data-ui, for example menu-screen, game-screen, or settings-screen.
-
-### 3) StateController (state)
-
-```js
-class AppState extends StateController {
-  constructor() {
-    super();
-    this.setStateTransitions({
-      menu: ["about"],
-      about: ["menu"],
+class MenuScreen extends BaseScreen {
+  ...
+  initEventListeners() {
+    this._el.goAbout.addEventListener("click", () => this.controller.state.change("about"));
+    this._els.buttons.forEach(button => {
+      button.addEventListener("click", () => console.log("button clicked"));
     });
   }
 }
 ```
 
-### 4) ScreenController (navigation)
+### The screen lifecycle
+
+Any screen needs to be initialized by calling the `init()` method. This method will call the `initEventListeners()` method, which is where you should attach the event listeners for the screen. Each screen can be initialized only once, and the `init()` method will take care of it. If you try to call `init()` again, it will not re-initialize the screen.
+
+> If you do not explicitly call `init()`, the screen will be initialized when it is shown for the first time. This is useful for screens that are not needed at the start of the application, as it will save resources until they are actually needed.
+
+To show a screen, you should call the `show(payload)` method. This method will add the `visibleClass` to the screen container and remove the `hiddenClass`. It will also call the `activate(payload)` method, which is where you should implement the logic for when the screen is activated. The `payload` argument is optional and can be used to pass data to the screen when it is shown.
+
+To hide a screen, you should call the `hide()` method. This method will add the `hiddenClass` to the screen container and remove the `visibleClass`. It will also call the `deactivate()` method, which is where you should implement the logic for when the screen is deactivated, to clean up any resources or stop any ongoing processes.
+
+> You advised to not to override the `show()` and `hide()` methods, as they handle the visibility classes and call the `activate()` and `deactivate()` methods. Instead, you should implement your logic in the `activate(payload)` and `deactivate()` methods.
+
+## `StateController` class
+
+The `StateController` class is responsible for managing the application states and their transitions. It allows you to define states, set valid transitions between them, and handle events when entering or leaving a state.
+
+Although not mandatory, it is recommended to use the `StateController` to manage the application states and transitions, and use the `ScreenController` to show or hide screens based on the current state. This separation of concerns keeps the application flow predictable and makes it easier to maintain. If you want to not to use the `StateController`, you can still use the `ScreenController` to manage screens directly, but you will lose the benefits of having a clear state machine and the associated events.
+
+When the `StateController` is created, it starts in a `null` state. So you need to set an initial state using the `change()` method. 
+
+### Defining states and transitions
+
+The `setStateTransitions(transitions)` method allows you to define the valid transitions between states. The `transitions` argument is an object where the keys are the state names and the values are arrays of valid next states.
+
+e.g.
 
 ```js
-const screens = new ScreenController();
-const state = new AppState();
-
-state.onEnter("menu", () => screens.showScreen("menu"));
-state.onEnter("about", () => screens.showScreen("about"));
+this.setStateTransitions({
+  menu: ["about"],
+  about: ["menu"],
+});
 ```
 
-### 5) BaseScreen (screen logic)
+That means that from the `menu` state you can go to the `about` state, and from the `about` state you can go back to the `menu` state. Any attempt to change to a state that is not in the valid transitions will trigger an error and the state will not change.
 
-The uiKeys are resolved inside the screen container using data-ui (and optionally by id if you keep the fallback enabled).
+### Changing states
+
+When using the `change(newState, payload)` method, the `StateController` will check if the transition from the current state to the `newState` is valid. 
+
+If a state transition is valid, it will trigger a _leave_ event for the current state and an _enter_ event for the new state (in the `StateController` events system). 
+
+To listen to these events, you can use the `on("enter", state, callback)` and `on("leave", state, callback)` methods.
+
+The callback functions for these events will have the following signature:
+
+- `callback(prevState, newState, controller)`: where `newState` is the state being entered, `prevState` is the state being left, and `controller` is the instance of the `StateController`.
+
+> To keep the state machine predictable, you should always navigate through state changes, and showing or hiding screens according to the state transitions instead of directly manipulating the DOM. This ensures that the application flow is consistent and that screens are only shown when the state allows it.
+
+To stop listening to a state event, you can call the function returned by the `on()` method. This will unregister the callback and prevent it from being called in the future. Alternatively, you can use the `off("enter", state, callback)` and `off("leave", state, callback)` methods to unregister a specific callback for a state event.
+
+There is a set of syntactic sugar methods to register callbacks for entering or leaving a specific state:
+- `onEnter(state, callback)`: registers a callback to be called when entering the specified state.
+- `onLeave(state, callback)`: registers a callback to be called when leaving the specified state.
+- `on(state, onEnterCallback, onLeaveCallback)`: registers callbacks for both entering and leaving the specified state.
+
+### Event system in `StateController`
+
+The `StateController` has an event system that allows you to emit and listen to custom events. You can use the `emit(event, ...args)` method to emit an event with optional arguments, and the `on(event, callback)` method to register a callback for a specific event.
+
+# Internationalization (I18n)
+
+`Orbital` includes a simple internationalization (I18n) system that allows you to translate the DOM using `data-i18n` attributes in HTML elements. It also supports programmatic translations through the `I18n` class.
+
+To use the I18n system, you need to set the translations for each language and set the active language. The translations are defined as an object where the keys are the language codes and the values are objects containing the translation keys and their corresponding translated strings.
 
 ```js
-class MenuScreen extends BaseScreen {
-  constructor(controller) {
-    super(controller, findUIElement("menu-screen"), ["go-about"]);
-  }
+import { I18n } from "orbital";
+const i18n = I18n.getInstance();
 
-  initEventListeners() {
-    this._el.goAbout.addEventListener("click", () => this.controller.state.change("about"));
-  }
-}
-
-class AboutScreen extends BaseScreen {
-  constructor(controller) {
-    super(controller, findUIElement("about-screen"), ["go-back"]);
-  }
-
-  initEventListeners() {
-    this._el.goBack.addEventListener("click", () => this.controller.state.change("menu"));
-  }
-}
+i18n.setTranslations({
+  es: {
+    "app.title": "Mi juego",
+    "menu.play": "Jugar",
+  },
+  en: {
+    "app.title": "My game",
+    "menu.play": "Play",
+  },
+});
+i18n.applyTranslations("es", {}, null, document.body);
 ```
 
-### 6) Complete minimal app
+The `data-i18n` attribute in HTML elements is used to specify the translation key for that element. When the active language is set, the I18n system will automatically update the text content of the elements with the corresponding translations.
+
+```html
+<h1 data-i18n="app.title">My game</h1>
+<button data-i18n="menu.play">Play</button>
+```
+
+In that example, when the active language is set to `es`, the text content of the `<h1>` element will be updated to "Mi juego" and the text content of the `<button>` element will be updated to "Jugar".
+
+## Programmatic translations
+
+You can also translate strings programmatically using the `I18n.t(key, variables)` method. The `key` is the translation key, and the optional `variables` argument is an object containing values to replace in the translation string.
 
 ```js
-import {
-  BaseScreen,
-  ScreenController,
-  StateController,
-  findUIElement,
-} from "https://cdn.jsdelivr.net/gh/dealfonso/Orbital@main/dist/index.js";
-
-class AppState extends StateController {
-  constructor() {
-    super();
-    this.setStateTransitions({ menu: ["about"], about: ["menu"] });
-  }
-}
-
-class MenuScreen extends BaseScreen {
-  constructor(controller) {
-    super(controller, findUIElement("menu-screen"), ["go-about"]);
-  }
-  initEventListeners() {
-    this._el.goAbout.addEventListener("click", () => this.controller.state.change("about"));
-  }
-}
-
-class AboutScreen extends BaseScreen {
-  constructor(controller) {
-    super(controller, findUIElement("about-screen"), ["go-back"]);
-  }
-  initEventListeners() {
-    this._el.goBack.addEventListener("click", () => this.controller.state.change("menu"));
-  }
-}
-
-class App extends ScreenController {
-  constructor() {
-    super();
-    this.state = new AppState();
-  }
-
-  init() {
-    this.addScreen("menu", new MenuScreen(this));
-    this.addScreen("about", new AboutScreen(this));
-    this.state.onEnter("menu", () => this.showScreen("menu"));
-    this.state.onEnter("about", () => this.showScreen("about"));
-    this.state.change("menu");
-  }
-}
-
-document.addEventListener("DOMContentLoaded", () => new App().init());
+const translatedString = I18n.t("menu.play");
 ```
 
-### How to add a new screen
+## Translations with variables
 
-1. Add an orb-screen section with its own data-ui
-2. Add internal uiKeys with data-ui
-3. Add the new state in StateController
-4. Create a class that extends BaseScreen
-5. Register the screen with addScreen
-6. Connect the state transition with showScreen
+A translation string can include variables that will be replaced with the provided values when the translation is applied. The variables are defined using curly braces `{}` in the translation string.
+
+```js
+i18n.setTranslations({
+  es: {
+    "score.value": "Puntos: {value}",
+  },
+});
+```
+
+When applying the translation, you can provide an object with the variable values to replace in the translation string.
+
+```js
+i18n.applyTranslations("es", { value: 120 }, null, document.body);
+```
+
+or
+
+```js
+I18n.t("score.value", { value: 120 });
+```
+
+## Scope
+
+The `I18n` class supports translating specific scopes in the DOM. You can specify a scope element when applying translations, and only the elements within that scope will be translated.
+
+The default scope is the entire document, and having a global I18n instance. But you can create a new instance of `I18n` and use it to translate a specific scope in the DOM. This is useful for translating specific sections of the application without affecting the entire document.
+
+```js
+const i18n = new I18n(options = {});
+i18n.setTranslations({
+  es: {
+    "menu.play": "Jugar",
+  },
+});
+i18n.applyTranslations("es", {}, null, document.querySelector("#menu"));
+```
+
+The `options` argument in the `I18n` constructor allows you to configure the behavior of the I18n instance. The available options are:
+- `missingKeyCallback`: a callback function that will be called when a translation key is missing. The function receives the missing key and the current language as arguments. The callback must return a string to be used as the translation for the missing key. If no callback is provided, the missing key will be used as the translation.
+
+## Utilities
+
+The `i18n` instance provides utility methods to help with creating the translations
+
+- `extractStringsFromHTML(nodes = null, scope = document)`: This method extracts all the strings from the HTML elements with `data-i18n` attributes within the specified scope. It returns an object containing the translation keys and their corresponding text content. This is useful for generating the initial translation files or for extracting strings from a specific section of the application.
+- `setCollectStrings(enable = true)` and `getCollectedStrings()`: These methods allow you to enable or disable the collection of strings for translation. When enabled, the `I18n` instance will collect all the strings that are translated using the `t()` method and store them in an internal object. You can retrieve the collected strings using the `getCollectedStrings()` method. This is useful for generating translation files or for keeping track of the strings that need to be translated.
+
+# Recipes
+
+## How to add a new screen
+
+1. Add an `orb-screen` section with its own `data-ui` attribute, to the HTML structure.
+2. Create a class that extends BaseScreen
+3. Implement the `initEventListeners()` method to attach the event listeners for the screen (if any).
+4. Implement the `activate(payload)` and `deactivate()` methods to handle the screen lifecycle.
+5. Add the screen to the `ScreenController` instance using the `add(name, screen)` method.
+6. Make that the screen is shown when the state changes to the corresponding state, by using the `on("enter", state, callback)` method of the `StateController` instance.
 
 Short example:
+
+```html
+...
+<section data-ui="settings-screen" class="orb-screen not-active">
+  <div class="orb-screen-content">
+    <h1>Settings</h1>
+    <button data-ui="settings-back">Back</button>
+  </div>
+</section>
+...
+```
 
 ```js
 class SettingsScreen extends BaseScreen {
@@ -427,179 +387,67 @@ class SettingsScreen extends BaseScreen {
 }
 ```
 
-## Base styles
+# CSS styles
 
-The base stylesheet lives in style.css and includes:
+The base stylesheet lives in `style.css` and includes styles for several components of the application. It is recommended to use these base styles as a starting point and customize them as needed for your application.
 
-- screens.css: shell and screen structure
-- buttons.css: buttons and groups
-- effects.css: transitions and animations
-- modal.css: modal styles
+## Screens
 
-### Main screen classes
-
-- orb-app-shell
-- orb-screen
-- orb-screen-content
-- orb-screen-stacked-group
-- not-active
-
-Typical structure:
+The basic structure is as follows:
 
 ```html
 <main class="orb-app-shell">
   <section data-ui="menu-screen" class="orb-screen not-active">
     <div class="orb-screen-content">...</div>
   </section>
+  <section data-ui="about-screen" class="orb-screen not-active">
+    <div class="orb-screen-content">...</div>
+  </section>
 </main>
 ```
 
-### Buttons
 
-- orb-btn
-- orb-btn icon-btn
-- xl / xxl
-- orb-button-group
+- `orb-app-shell`: This is the main container, that makes the application behave like a single-page app, and contains all the screens.
+- `orb-screen`: Each screen container, which is hidden by default and shown when the corresponding state is active.
+- `orb-screen-content`: Inner layout for each screen.
+- `orb-screen-stacked-group`: If you want to make that multiple screen contents are stacked on top of each other, allowing for a layered effect, you can use this class in the parent container of the screens. For example, you can have a screen with the control panel, another screen with the game content, and another with a content when the game is paused, you can show or hide the pause screen without affecting the other two screens, and the pause screen will be stacked on top of the game content screen.
 
-```html
-<div class="orb-button-group">
-  <button class="orb-btn">Normal</button>
-  <button class="orb-btn icon-btn xl">+</button>
-</div>
+## Effects
+
+There are multiple classes for transitions and animations that can be applied to screens (or other elements). These classes can be combined to create complex effects.
+
+- `orb-fade-in`, `orb-fade-out`: fade in and fade out effects.
+- `orb-slide-up`, `orb-slide-down`, `orb-slide-left`, `orb-slide-right`: slide in and slide out effects from different directions.
+- `orb-scale-up`, `orb-scale-down`, `orb-scale-bounce`: scale in and scale out effects, with a bounce effect
+- `orb-shake`: shake effect
+- `orb-rotate-in-center`: rotate in effect from the center
+
+Moreover they can be combined with the following classes to control the speed and intensity of the effects:
+- `orb-effect-strong`, `orb-effect-weak`: control the intensity of the effect (i.e. the magnitude of the transformation).
+- `orb-fast`, `orb-very-fast`, `orb-slow`, `orb-very-slow`: control the speed of the effect (i.e. the duration of the animation).
+
+## Buttons
+
+Although this framework is not focused on providing a complete UI library, it includes some basic styles for buttons and modals that can be used as a starting point for your application.
+
+- `orb-btn`: basic button style.
+- `orb-btn icon-btn`: button with an icon.
+- `xl`, `xxl`: extra large button sizes.
+- `orb-button-group`: a container for grouping buttons together.
+
+To help styling buttons, there are several variables that you can customize for your buttons:
+
+```css
+:root {
+  --orb-btn-text-color: #F5F1FF;
+  --orb-btn-background: rgba(255, 255, 255, 0.07);
+  --orb-btn-border-strong: rgba(255, 255, 255, 0.15);
+  --orb-btn-border: rgba(255, 255, 255, 0.14);
+  --orb-btn-color: #FF5FA2;
+  --orb-btn-color-light: #FF87BC;
+  --orb-btn-color-dark: #C93E7B;
+  --orb-btn-color-shadow: rgba(255, 95, 162, .35);
+  --orb-btn-color-shadow-dark: rgba(255, 95, 162, .5);
+}
 ```
 
-### Transition effects
-
-Available classes:
-
-- orb-fade-in, orb-fade-out
-- orb-slide-up, orb-slide-down, orb-slide-left, orb-slide-right
-- orb-scale-up, orb-scale-down, orb-scale-bounce
-- orb-shake
-- orb-rotate-in-center
-- orb-effect-strong, orb-effect-weak
-- fast, very-fast, slow, orb-very-slow
-
-Example:
-
-```html
-<section class="orb-screen orb-effects orb-slide-left orb-fade-in">...</section>
-```
-
-## I18n
-
-I18n translates keys in the DOM through data-i18n and also supports manual translation.
-
-### Basic usage
-
-```js
-import { I18n } from "orbital";
-
-const i18n = I18n.getInstance();
-
-i18n.setTranslations({
-  es: {
-    "app.title": "Mi juego",
-    "menu.play": "Jugar",
-  },
-  en: {
-    "app.title": "My game",
-    "menu.play": "Play",
-  },
-});
-
-i18n.setActiveLanguage("es");
-```
-
-```html
-<h1 data-i18n="app.title">My game</h1>
-<button data-i18n="menu.play">Play</button>
-```
-
-### Translate a key
-
-```js
-I18n.t("menu.play");
-```
-
-### Variables
-
-```js
-i18n.setTranslations({ es: { "score.value": "Puntos: {value}" } });
-I18n.t("score.value", { value: 120 });
-```
-
-### Translate a specific scope
-
-```js
-const panel = document.querySelector("#panel");
-i18n.applyTranslations("es", {}, null, panel);
-```
-
-### Extract strings from HTML
-
-```js
-const strings = i18n.extractStringsFromHTML();
-console.log(strings);
-```
-
-## Other: modal
-
-ModalDialog creates modals with button close, backdrop close, Escape support, and actions through data-modal-action.
-
-### Minimal HTML
-
-```html
-<div class="orb-modal not-active" data-ui="help-modal" data-backdrop data-escape>
-  <div class="orb-modal-content">
-    <button class="orb-btn-close" data-close>Close</button>
-    <h2>Help</h2>
-    <p>This is a simple modal.</p>
-    <button class="orb-btn" data-modal-action="accept">Accept</button>
-  </div>
-</div>
-```
-
-### JavaScript
-
-```js
-import { ModalDialog, findUIElement } from "orbital";
-
-const modalEl = findUIElement("help-modal");
-const modal = new ModalDialog(modalEl, {
-  buttonActions: {
-    accept() {
-      console.log("accept action");
-    },
-  },
-});
-
-document.querySelector("#open-help").addEventListener("click", () => {
-  modal.show();
-});
-```
-
-### Initialize multiple modals
-
-```js
-ModalDialog.initModals();
-```
-
-### Events
-
-- orb-modal-shown
-- orb-modal-hidden
-- orb-modal-closed
-- orb-modal-action-<name>
-
-```js
-modalEl.addEventListener("orb-modal-closed", () => {
-  console.log("modal closed");
-});
-```
-
-## Development
-
-```bash
-npm run build
-```

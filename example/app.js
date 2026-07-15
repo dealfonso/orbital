@@ -237,17 +237,17 @@ class ExampleApp extends ScreenController {
 
   init() {
     I18n.getInstance().setActiveLanguage(this.appOptions.language);
-    this.addScreen("welcome", new WelcomeScreen(this));
-    this.addScreen("menu", new MenuScreen(this));
-    this.addScreen("fireworks", new FireworksScreen(this));
-    this.addScreen("stars", new StarsScreen(this));
-    this.addScreen("cubo", new CuboScreen(this));
+    this.add("welcome", new WelcomeScreen(this));
+    this.add("menu", new MenuScreen(this));
+    this.add("fireworks", new FireworksScreen(this));
+    this.add("stars", new StarsScreen(this));
+    this.add("cubo", new CuboScreen(this));
 
-    this.state.onEnter("init", () => this.showScreen("welcome"));
-    this.state.onEnter("menu", () => this.showScreen("menu"));
-    this.state.onEnter("fireworks", () => this.showScreen("fireworks"));
-    this.state.onEnter("stars", () => this.showScreen("stars"));
-    this.state.onEnter("cubo", () => this.showScreen("cubo"));
+    this.state.onEnter("init", () => this.show("welcome"));
+    this.state.onEnter("menu", () => this.show("menu"));
+    this.state.onEnter("fireworks", () => this.show("fireworks"));
+    this.state.onEnter("stars", () => this.show("stars"));
+    this.state.onEnter("cubo", () => this.show("cubo"));
 
     this.createBGStars(document.getElementById("stars"), 70, 4);
 

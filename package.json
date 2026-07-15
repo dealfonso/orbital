@@ -1,6 +1,6 @@
 {
   "name": "orbital",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "description": "Orbital (ORB) is a lightweight framework to build interactive HTML/CSS/JavaScript apps with screen navigation, state flows and i18n.",
   "type": "module",
   "main": "./dist/index.js",

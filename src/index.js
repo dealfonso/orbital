@@ -12,7 +12,7 @@ import { StateController } from "./js/stateController.js";
 import { ModalDialog } from "./js/modalDialog.js";
 import { findUIElement } from "./js/utils.js";
 
-export const version = "1.1.0";
+export const version = "1.1.1";
 
 export const ORB = Object.freeze({
 	BaseScreen,
