@@ -1,87 +1,87 @@
-![Orbital logo](img/orbital-logo.png)
+![Orbital logo](img/orbital-logo-p.png)
 
 # Orbital (ORB)
 
-ORB es un mini-framework ligero para crear aplicaciones interactivas con HTML, CSS y JavaScript, pensado para ejecutarse en web y evolucionar a PWA instalable. Aunque nació orientado a juegos, su diseño sirve igual para aplicaciones estándar con navegación por pantallas y lógica de estado.
+ORB is a lightweight mini-framework for building interactive applications with HTML, CSS, and JavaScript, designed to run on the web and grow into an installable PWA. Although it started with games in mind, its design works just as well for standard applications with screen-based navigation and state-driven logic.
 
-La idea central es construir la aplicación como una máquina de estados: no se navega mostrando pantallas directamente, sino cambiando el estado de la aplicación. Ese cambio activa o desactiva pantallas y define las rutas de navegación permitidas.
+The core idea is to build the application as a state machine: you do not navigate by showing screens directly, but by changing the application state. That change activates or deactivates screens and defines the allowed navigation paths.
 
-Este enfoque mantiene el comportamiento predecible, simplifica el crecimiento del proyecto y reduce errores de UI cuando la aplicación escala.
+This approach keeps behavior predictable, makes the project easier to grow, and reduces UI errors as the application scales.
 
-Incluye:
+It includes:
 
-- ScreenController para mostrar, apilar y cerrar pantallas
-- StateController para modelar estados y transiciones
-- BaseScreen para encapsular la lógica de cada pantalla
-- I18n para traducir el DOM con data-i18n
-- ModalDialog para modales sencillos
-- findUIElement para localizar elementos por data-ui jerárquico
-- CSS base para shell, pantallas, botones, efectos y modal
+- ScreenController to show, stack, and close screens
+- StateController to model states and transitions
+- BaseScreen to encapsulate the logic of each screen
+- I18n to translate the DOM using data-i18n
+- ModalDialog for simple modals
+- findUIElement to locate elements through hierarchical data-ui selectors
+- Base CSS for the app shell, screens, buttons, effects, and modal
 
-## Visión del framework
+## Framework vision
 
-- App-first y multiplataforma: pensado para experiencias web que funcionan bien en móvil y escritorio
-- PWA-ready: estructura adecuada para convertir el proyecto en app instalable
-- Multiuso: válido para juegos y para aplicaciones de negocio o utilidad
-- Arquitectura explícita: estados, transiciones y pantallas desacopladas
+- App-first and cross-platform: designed for web experiences that work well on mobile and desktop
+- PWA-ready: a suitable structure for turning the project into an installable app
+- Multi-purpose: useful for games as well as business or utility applications
+- Explicit architecture: decoupled states, transitions, and screens
 
-## Modelo de arquitectura recomendado
+## Recommended architecture model
 
-1. Define los estados de la aplicación y sus transiciones válidas
-2. Conecta cada estado a la activación de una pantalla
-3. Haz cada pantalla autocontenida en su ciclo de vida
-4. Navega siempre por cambios de estado, no por toggles directos de DOM
+1. Define the application states and their valid transitions
+2. Connect each state to the activation of a screen
+3. Make each screen self-contained in its own lifecycle
+4. Always navigate through state changes, not direct DOM toggles
 
-### Principios clave
+### Key principles
 
-- El estado manda; la UI reacciona
-- Las pantallas no se muestran por acceso directo desde cualquier parte del código
-- Cada pantalla crea recursos al activarse y los libera al desactivarse
-- La navegación es declarativa: solo transiciones permitidas
+- State drives the flow; the UI reacts
+- Screens should not be shown through direct access from anywhere in the code
+- Each screen creates resources when activated and releases them when deactivated
+- Navigation is declarative: only allowed transitions are possible
 
-### Ciclo de vida de una pantalla
+### Screen lifecycle
 
-Al activarse una pantalla:
+When a screen is activated:
 
-- engancha listeners
-- inicia temporizadores o animaciones
-- reserva recursos necesarios para esa vista
+- attach listeners
+- start timers or animations
+- allocate the resources needed for that view
 
-Al desactivarse una pantalla:
+When a screen is deactivated:
 
-- desengancha listeners
-- detiene temporizadores o animaciones
-- libera recursos para evitar fugas y comportamientos fantasma
+- detach listeners
+- stop timers or animations
+- release resources to avoid leaks and ghost behavior
 
-Este patrón permite pantallas robustas, aisladas y fáciles de mantener.
+This pattern makes screens robust, isolated, and easy to maintain.
 
-## Marca
+## Branding
 
-Nombre oficial: Orbital
+Official name: Orbital
 
-Por qué encaja:
+Why it fits:
 
-- Es corto, recordable y suena a producto
-- Comunica navegación y recorrido entre pantallas sin sonar técnico
-- Es suficientemente amplio para juegos y apps estándar
+- It is short, memorable, and product-like
+- It conveys navigation and movement between screens without sounding technical
+- It is broad enough for games and standard apps
 
-Identidad visual:
+Visual identity:
 
-- Logo Orbital con motivo de órbitas y descriptor: State • Flow • Experience
+- Orbital logo with an orbit motif and descriptor: State • Flow • Experience
 
-Codename / acrónimo: ORB
+Codename / acronym: ORB
 
-Convención de naming:
+Naming convention:
 
-- prefijo CSS: orb-
-- namespace JS: ORB
-- nombre de paquete: orbital
+- CSS prefix: orb-
+- JS namespace: ORB
+- package name: orbital
 
 ## Quick Start (TLDR)
 
-Si solo quieres arrancar rápido:
+If you just want to get started quickly:
 
-1. Instala y carga estilos
+1. Install and load the styles
 
 ```bash
 npm install orbital
@@ -92,7 +92,7 @@ import { BaseScreen, ScreenController, StateController, findUIElement } from "or
 import "orbital/style.css";
 ```
 
-2. Crea dos pantallas en HTML con data-ui
+2. Create two screens in HTML with data-ui
 
 ```html
 <main class="orb-app-shell">
@@ -101,12 +101,12 @@ import "orbital/style.css";
   </section>
 
   <section data-ui="about-screen" class="orb-screen not-active">
-    <button data-ui="go-back">Volver</button>
+    <button data-ui="go-back">Back</button>
   </section>
 </main>
 ```
 
-3. Conecta estado + navegación
+3. Connect state + navigation
 
 ```js
 class AppState extends StateController {
@@ -152,15 +152,15 @@ class App extends ScreenController {
 document.addEventListener("DOMContentLoaded", () => new App().init());
 ```
 
-Con eso ya tienes una app mínima funcional.
+That is enough to get a minimal working app.
 
-## Guía didáctica
+## Practical guide
 
-## API rápida
+## Quick API
 
-Referencia rápida de exports:
+Quick export reference:
 
-Exports principales:
+Main exports:
 
 - BaseScreen
 - ScreenController
@@ -168,9 +168,9 @@ Exports principales:
 - I18n
 - ModalDialog
 - findUIElement
-- ORB (namespace por defecto)
+- ORB (default namespace)
 
-Snippet rápido:
+Quick snippet:
 
 ```js
 import {
@@ -185,9 +185,9 @@ import {
 import "orbital/style.css";
 ```
 
-## Cómo usarlo
+## How to use it
 
-### 1. Desde npm
+### 1. From npm
 
 ```bash
 npm install orbital
@@ -206,7 +206,7 @@ import {
 import "orbital/style.css";
 ```
 
-Tambien puedes usar el namespace por defecto:
+You can also use the default namespace:
 
 ```js
 import ORB from "orbital";
@@ -214,7 +214,7 @@ import ORB from "orbital";
 const { BaseScreen, ScreenController, StateController, I18n, findUIElement } = ORB;
 ```
 
-### 2. Desde CDN (dist)
+### 2. From CDN (dist)
 
 ```html
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/dealfonso/Orbital@main/dist/style.css">
@@ -229,11 +229,11 @@ const { BaseScreen, ScreenController, StateController, I18n, findUIElement } = O
 </script>
 ```
 
-Puedes fijar una versión concreta cambiando @main por una etiqueta o versión.
+You can pin a specific version by replacing @main with a tag or version.
 
-### 3. Desde src (desarrollo local)
+### 3. From src (local development)
 
-Si trabajas dentro del repositorio:
+If you are working inside the repository:
 
 ```js
 import {
@@ -247,20 +247,20 @@ import {
 import "./src/style.css";
 ```
 
-### 4. dist o src
+### 4. dist or src
 
-- dist: artefactos listos para consumo (bundle ESM + CSS)
-- src: código fuente para depurar o desarrollar el framework
+- dist: ready-to-consume artifacts (ESM bundle + CSS)
+- src: source code for debugging or developing the framework
 
-## Aplicación mínima paso a paso
+## Minimal application step by step
 
-Objetivo: dos pantallas, ir y volver, con el menor código posible.
+Goal: two screens, go forward and back, with the smallest amount of code possible.
 
-### 1) HTML base
+### 1) Base HTML
 
 ```html
 <!DOCTYPE html>
-<html lang="es">
+<html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -272,14 +272,14 @@ Objetivo: dos pantallas, ir y volver, con el menor código posible.
     <section data-ui="menu-screen" class="orb-screen orb-effects orb-fade-in">
       <div class="orb-screen-content">
         <h1>Menu</h1>
-        <button data-ui="go-about" class="orb-btn">Ir a otra pantalla</button>
+        <button data-ui="go-about" class="orb-btn">Go to another screen</button>
       </div>
     </section>
 
     <section data-ui="about-screen" class="orb-screen not-active orb-effects orb-slide-left orb-fade-in">
       <div class="orb-screen-content">
         <h1>About</h1>
-        <button data-ui="go-back" class="orb-btn">Volver</button>
+        <button data-ui="go-back" class="orb-btn">Back</button>
       </div>
     </section>
   </main>
@@ -289,17 +289,17 @@ Objetivo: dos pantallas, ir y volver, con el menor código posible.
 </html>
 ```
 
-### 2) Estructura del HTML
+### 2) HTML structure
 
-- orb-app-shell: contenedor principal que apila pantallas
-- orb-screen: cada pantalla
-- not-active: pantalla oculta
-- orb-screen-content: layout interior base
-- orb-screen-stacked-group: variante para overlays de contenido
+- orb-app-shell: main container that stacks screens
+- orb-screen: each screen
+- not-active: hidden screen
+- orb-screen-content: base inner layout
+- orb-screen-stacked-group: variant for content overlays
 
-Cada pantalla debe tener su data-ui raíz, por ejemplo menu-screen, game-screen, settings-screen.
+Each screen should have its own root data-ui, for example menu-screen, game-screen, or settings-screen.
 
-### 3) StateController (estado)
+### 3) StateController (state)
 
 ```js
 class AppState extends StateController {
@@ -313,7 +313,7 @@ class AppState extends StateController {
 }
 ```
 
-### 4) ScreenController (navegación)
+### 4) ScreenController (navigation)
 
 ```js
 const screens = new ScreenController();
@@ -323,9 +323,9 @@ state.onEnter("menu", () => screens.showScreen("menu"));
 state.onEnter("about", () => screens.showScreen("about"));
 ```
 
-### 5) BaseScreen (lógica de pantalla)
+### 5) BaseScreen (screen logic)
 
-Las uiKeys se resuelven dentro del contenedor de pantalla por data-ui (y opcionalmente por id si dejas fallback activo).
+The uiKeys are resolved inside the screen container using data-ui (and optionally by id if you keep the fallback enabled).
 
 ```js
 class MenuScreen extends BaseScreen {
@@ -349,7 +349,7 @@ class AboutScreen extends BaseScreen {
 }
 ```
 
-### 6) App completa mínima
+### 6) Complete minimal app
 
 ```js
 import {
@@ -402,16 +402,16 @@ class App extends ScreenController {
 document.addEventListener("DOMContentLoaded", () => new App().init());
 ```
 
-### Cómo añadir una nueva pantalla
+### How to add a new screen
 
-1. Añade un section orb-screen con data-ui propio
-2. Añade uiKeys internas con data-ui
-3. Añade el nuevo estado en StateController
-4. Crea una clase que extienda BaseScreen
-5. Registra la pantalla con addScreen
-6. Conecta transición de estado con showScreen
+1. Add an orb-screen section with its own data-ui
+2. Add internal uiKeys with data-ui
+3. Add the new state in StateController
+4. Create a class that extends BaseScreen
+5. Register the screen with addScreen
+6. Connect the state transition with showScreen
 
-Ejemplo corto:
+Short example:
 
 ```js
 class SettingsScreen extends BaseScreen {
@@ -427,16 +427,16 @@ class SettingsScreen extends BaseScreen {
 }
 ```
 
-## Estilos básicos
+## Base styles
 
-El estilo base vive en style.css e incluye:
+The base stylesheet lives in style.css and includes:
 
-- screens.css: shell y estructura de pantallas
-- buttons.css: botones y grupos
-- effects.css: transiciones y animaciones
-- modal.css: estilos del modal
+- screens.css: shell and screen structure
+- buttons.css: buttons and groups
+- effects.css: transitions and animations
+- modal.css: modal styles
 
-### Clases principales de pantalla
+### Main screen classes
 
 - orb-app-shell
 - orb-screen
@@ -444,7 +444,7 @@ El estilo base vive en style.css e incluye:
 - orb-screen-stacked-group
 - not-active
 
-Estructura típica:
+Typical structure:
 
 ```html
 <main class="orb-app-shell">
@@ -454,7 +454,7 @@ Estructura típica:
 </main>
 ```
 
-### Botones
+### Buttons
 
 - orb-btn
 - orb-btn icon-btn
@@ -468,9 +468,9 @@ Estructura típica:
 </div>
 ```
 
-### Efectos de transición
+### Transition effects
 
-Clases disponibles:
+Available classes:
 
 - orb-fade-in, orb-fade-out
 - orb-slide-up, orb-slide-down, orb-slide-left, orb-slide-right
@@ -480,7 +480,7 @@ Clases disponibles:
 - orb-effect-strong, orb-effect-weak
 - fast, very-fast, slow, orb-very-slow
 
-Ejemplo:
+Example:
 
 ```html
 <section class="orb-screen orb-effects orb-slide-left orb-fade-in">...</section>
@@ -488,9 +488,9 @@ Ejemplo:
 
 ## I18n
 
-I18n traduce claves en el DOM mediante data-i18n y permite traducir manualmente.
+I18n translates keys in the DOM through data-i18n and also supports manual translation.
 
-### Uso básico
+### Basic usage
 
 ```js
 import { I18n } from "orbital";
@@ -512,11 +512,11 @@ i18n.setActiveLanguage("es");
 ```
 
 ```html
-<h1 data-i18n="app.title">Mi juego</h1>
-<button data-i18n="menu.play">Jugar</button>
+<h1 data-i18n="app.title">My game</h1>
+<button data-i18n="menu.play">Play</button>
 ```
 
-### Traducir una clave
+### Translate a key
 
 ```js
 I18n.t("menu.play");
@@ -529,33 +529,33 @@ i18n.setTranslations({ es: { "score.value": "Puntos: {value}" } });
 I18n.t("score.value", { value: 120 });
 ```
 
-### Traducir un scope concreto
+### Translate a specific scope
 
 ```js
 const panel = document.querySelector("#panel");
 i18n.applyTranslations("es", {}, null, panel);
 ```
 
-### Extraer cadenas del HTML
+### Extract strings from HTML
 
 ```js
 const strings = i18n.extractStringsFromHTML();
 console.log(strings);
 ```
 
-## Otros: modal
+## Other: modal
 
-ModalDialog crea modales con cierre por botón, backdrop, Escape y acciones por data-modal-action.
+ModalDialog creates modals with button close, backdrop close, Escape support, and actions through data-modal-action.
 
-### HTML mínimo
+### Minimal HTML
 
 ```html
 <div class="orb-modal not-active" data-ui="help-modal" data-backdrop data-escape>
   <div class="orb-modal-content">
-    <button class="orb-btn-close" data-close>Cerrar</button>
-    <h2>Ayuda</h2>
-    <p>Este es un modal sencillo.</p>
-    <button class="orb-btn" data-modal-action="accept">Aceptar</button>
+    <button class="orb-btn-close" data-close>Close</button>
+    <h2>Help</h2>
+    <p>This is a simple modal.</p>
+    <button class="orb-btn" data-modal-action="accept">Accept</button>
   </div>
 </div>
 ```
@@ -569,7 +569,7 @@ const modalEl = findUIElement("help-modal");
 const modal = new ModalDialog(modalEl, {
   buttonActions: {
     accept() {
-      console.log("accion accept");
+      console.log("accept action");
     },
   },
 });
@@ -579,26 +579,26 @@ document.querySelector("#open-help").addEventListener("click", () => {
 });
 ```
 
-### Inicializar varios modales
+### Initialize multiple modals
 
 ```js
 ModalDialog.initModals();
 ```
 
-### Eventos
+### Events
 
 - orb-modal-shown
 - orb-modal-hidden
 - orb-modal-closed
-- orb-modal-action-<nombre>
+- orb-modal-action-<name>
 
 ```js
 modalEl.addEventListener("orb-modal-closed", () => {
-  console.log("modal cerrado");
+  console.log("modal closed");
 });
 ```
 
-## Desarrollo
+## Development
 
 ```bash
 npm run build
