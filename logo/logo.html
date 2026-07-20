@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@icon/themify-icons@1/themify-icons.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
+<style>
+    svg {
+        width: 100%;
+        height: 100%;
+    }
+    body {
+        margin: 0;
+        padding: 0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        height: 100vh;
+    }
+    .logo-container {
+        position: relative;
+        width: 200px;
+        height: 200px;
+        overflow: hidden;
+    }
+    .logo-container .download-button-group {
+        position: absolute;
+        display: none;
+        flex-direction: row;
+        gap: 8px;
+        top: 8px;
+        right: 8px;
+        padding: 4px;
+        background-color: rgba(255, 255, 255, 0.8);
+        border-radius: 4px;
+    }
+    .logo-container:hover .download-button-group {
+        display: flex;
+    }
+    .download-button {
+        background-color: rgba(240, 240, 240, 1);;
+        color: black;
+        border: 1px solid rgba(0, 0, 0, 0.1);
+        width: 24px;
+        height: 24px;
+        font-size: 14px;
+        display: flex;
+        cursor: pointer;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+    }
+    .download-button:hover {
+        background-color: rgba(250, 250, 250, 1);
+    }
+</style>
+<body>
+    <div id="isotipo-container" class="logo-container">
+        <div class="download-button-group">
+            <a class="download-button" onclick="downloadSVG('isotipo-container', 'isotipo.svg')">
+                <i class="bi bi-filetype-svg"></i>
+            </a>
+            <a class="download-button" onclick="downloadPNG('isotipo-container', 'isotipo.png')">
+                <i class="bi bi-filetype-png"></i>
+            </a>
+        </div>
+    </div>
+    <div id="logo-horizontal-container" class="logo-container">
+        <div class="download-button-group">
+            <a class="download-button" onclick="downloadSVG('logo-horizontal-container', 'logo-horizontal.svg')">
+                <i class="bi bi-filetype-svg"></i>
+            </a>
+            <a class="download-button" onclick="downloadPNG('logo-horizontal-container', 'logo-horizontal.png')">
+                <i class="bi bi-filetype-png"></i>
+            </a>
+        </div>
+    </div>
+    <div id="logo-vertical-container" class="logo-container">
+        <div class="download-button-group">
+            <a class="download-button" onclick="downloadSVG('logo-vertical-container', 'logo-vertical.svg')">
+                <i class="bi bi-filetype-svg"></i>
+            </a>
+            <a class="download-button" onclick="downloadPNG('logo-vertical-container', 'logo-vertical.png')">
+                <i class="bi bi-filetype-png"></i>
+            </a>
+        </div>
+    </div>
+    <script type="module">
+        window.downloadSVG = function(containerId, filename) {
+            const container = document.getElementById(containerId);
+            const svgElement = container.querySelector('svg');
+            if (svgElement) {
+                const serializer = new XMLSerializer();
+                const svgString = serializer.serializeToString(svgElement);
+                const blob = new Blob([svgString], { type: 'image/svg+xml' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = filename;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+            }
+        }
+
+        window.downloadPNG = function(containerId, filename) {
+            const container = document.getElementById(containerId);
+            const svgElement = container.querySelector('svg');
+            if (svgElement) {
+                const serializer = new XMLSerializer();
+                const svgString = serializer.serializeToString(svgElement);
+                const canvas = document.createElement('canvas');
+                const ctx = canvas.getContext('2d');
+                const img = new Image();
+                img.onload = function() {
+                    canvas.width = img.width;
+                    canvas.height = img.height;
+                    ctx.drawImage(img, 0, 0);
+                    canvas.toBlob(function(blob) {
+                        const url = URL.createObjectURL(blob);
+                        const a = document.createElement('a');
+                        a.href = url;
+                        a.download = filename;
+                        document.body.appendChild(a);
+                        a.click();
+                        document.body.removeChild(a);
+                        URL.revokeObjectURL(url);
+                    }, 'image/png');
+                };
+                img.src = 'data:image/svg+xml;base64,' + btoa(svgString);
+            }
+        }
+
+        import { crearLogo, crearIsotipo, crearLogoH, crearLogoV } from "./logo.js";
+        document.addEventListener("DOMContentLoaded", async () => {
+            const isotipoContainer = document.getElementById("isotipo-container");
+            const logoHorizontalContainer = document.getElementById("logo-horizontal-container");
+            const logoVerticalContainer = document.getElementById("logo-vertical-container");
+
+            // Create and append isotipo
+            const isotipo = await crearLogo();
+            isotipoContainer.appendChild(isotipo);
+
+            // Create and append horizontal logo
+            const logoH = await crearLogoH();
+            logoHorizontalContainer.appendChild(logoH);
+
+            // Create and append vertical logo
+            const logoV = await crearLogoV();
+            logoVerticalContainer.appendChild(logoV);
+        });
+    </script>
+</body>
