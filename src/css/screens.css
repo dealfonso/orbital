@@ -29,6 +29,7 @@
     padding: clamp(14px, 3.2vw, 34px);
     border-radius: 1rem;
     background-color: rgba(255, 255, 255, 0.05);
+    overflow-y: auto;
 }
 
 .orb-screen-content > * {

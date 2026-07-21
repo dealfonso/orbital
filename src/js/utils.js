@@ -149,3 +149,7 @@ export function findUIElement(uiId, root = document) {
 
     return currentRoot; // Return the final found element
 }
+
+export function isElement(value) {
+    return value && typeof value === "object" && value.nodeType === Node.ELEMENT_NODE;
+}

@@ -1,84 +1,37 @@
-import { snakeCaseToCamelCase, escapeCssValue } from "./utils.js";
+import { snakeCaseToCamelCase, escapeCssValue, findUIElement } from "./utils.js";
+import { OrbitalUIObject } from "./orbitalUiObject.js";
 
 const defaultOptions = {
     // The CSS class to add to the container when the screen is shown. You can use this class to define the styles for the visible state of the screen, such as display: block or opacity: 1.
     visibleClass: "active",
     // The CSS class to add to the container when the screen is hidden. You can use this class to define the styles for the hidden state of the screen, such as display: none or opacity: 0.
     hiddenClass: "not-active",
-    // Scope used to resolve UI elements declared in uiKeys.
-    // - "container": resolve inside this.container first (recommended)
-    // - "document": resolve globally in the whole document
-    scope: "container",
-    // Backward-compatible fallback. If an element is not found in container scope,
-    // it will be searched globally by id.
-    allowGlobalIdFallback: false,
-    // If true, try data-ui first and id second when resolving uiKeys.
-    preferDataUi: false,
+    // If true, this class will throw an exception whenever a uiKey is not found in the specified scope. If false, it will log a warning instead.
+    //  (*) this is useful for debugging and development, but may be too strict for production use.
+    throwOnMissingElement: false
 };
 
-function isElement(value) {
-    return value && typeof value === "object" && value.nodeType === Node.ELEMENT_NODE;
-}
-
-export class BaseScreen {
+export class BaseScreen extends OrbitalUIObject {
     /**
-    * Create a new screen instance. The screen will be rendered inside the provided container element. Optionally, you can 
-    *  provide an array of UI keys to acquire and bind to this screen for easy access.
+     * Create a new screen instance. The screen will be rendered inside the provided container element. Optionally, you can 
+     *  provide an array of UI keys to acquire and bind to this screen for easy access.
+     * @param {StateController} controller The state controller that manages the state transitions for this screen. It should be an instance of StateController or a subclass of it.
      * @param {HTMLElement} baseContainer container element for this screen.
-    * @param {Array<string>} uiKeys list of UI keys to acquire and bind to this screen. For example: ["start-btn", "score-display"]
-    *          UI keys are resolved inside the container, preferring id or data-ui according to options.preferDataUi.
-    *          The keys will be used as property names in this._el. For example, if you acquire "start-btn", you can access it later with 
-     *          this._el["start-btn"] or this._el.startBtn.
      * @param {Dict<string, string>} uiElementSelectors optional dictionary of element selectors to acquire and bind to this screen. 
      *          For example: { "startBtn": "#start-btn", "modeButtons": ".mode-btn" }
      *          
      *          The keys will be stored as property names in this._els, as Arrays[HTMLElement]. So that you can access them later with 
      *          this._els.startBtn or this._els["startBtn"] or this._els["modeButtons"]. Each of them will be an array of elements matching the selector). This is useful for acquiring multiple elements with the same class or data attribute, such as buttons for different game modes.
      */
-    constructor(controller, baseContainer, uiKeys = [], uiElementSelectors = {}, options = {}) {
+    constructor(controller, baseContainer, uiElementSelectors = {}, options = {}) {
+        super(baseContainer);
+
         this.controller = controller;
         this.options = { ...defaultOptions, ...options };
-        this.container = isElement(baseContainer) ? baseContainer : null;
-        if (!this.container) {
-            throw new Error("BaseScreen expects an HTMLElement as the container argument");
-        }
-        this._baseContainer = baseContainer;
-        this.acquireElements(uiKeys);
-        this.acquireElementsBySelector(uiElementSelectors);
+        this.container = baseContainer;
         this._initialized = false;
-    }
 
-    findElementInContainerById(id) {
-        const escapedId = escapeCssValue(id);
-        return this.container.querySelector(`#${escapedId}`);
-    }
-
-    findElementInContainerByDataUi(key) {
-        const escapedKey = escapeCssValue(key);
-        return this.container.querySelector(`[data-ui="${escapedKey}"]`);
-    }
-
-    resolveElement(key) {
-        const searchInContainer = this.options.scope !== "document";
-        const preferDataUi = this.options.preferDataUi;
-
-        if (searchInContainer) {
-            const byDataUi = this.findElementInContainerByDataUi(key);
-            const byId = this.findElementInContainerById(key);
-            const inContainer = preferDataUi ? (byDataUi || byId) : (byId || byDataUi);
-            if (inContainer) {
-                return inContainer;
-            }
-        }
-
-        if (this.options.scope === "document" || this.options.allowGlobalIdFallback) {
-            const globalElement = document.getElementById(key);
-            if (globalElement) {
-                return globalElement;
-            }
-        }
-
-        return null;
+        this.acquireElementsBySelector(uiElementSelectors);
     }
 
     /**
@@ -127,26 +80,6 @@ export class BaseScreen {
     }
 
     /**
-     * Bind multiple UI elements by key. The elements should be inside the container of this screen.
-     * Keys can resolve to either id or data-ui, with optional document-level id fallback.
-     * 
-     * @param {Array<string>} uiKeys The UI keys of the elements to acquire. For example: ["start-btn", "score-display"]
-     * @returns {Dict<string, HTMLElement>} An object with the acquired elements, keyed by their UI keys. For example: 
-     *      { "start-btn": HTMLElement, "score-display": HTMLElement }
-     */
-    bindElements(uiKeys = []) {
-        const elements = {};
-        for (const uiKey of uiKeys) {
-            const el = this.resolveElement(uiKey);
-            if (!el) {
-                console.warn(`Element "${uiKey}" not found in scope "${this.options.scope}"`);
-            }
-            elements[uiKey] = el;
-        }
-        return elements;
-    }
-
-    /**
      * Bind elements by CSS selectors. The elements should be inside the container of this screen.
      * 
      * @param {Dict<string, string>} selectors An object with CSS selectors as values and keys for the property names. 
@@ -163,25 +96,6 @@ export class BaseScreen {
             }
             elements[key] = els;
         }
-        return elements;
-    }
-
-    /**
-     * Acquire and bind multiple UI elements by key. The elements should be inside the container of this screen.
-     *   - The acquired elements will be stored in this._el for easy access. For example, if you acquire "start-btn", 
-     *     you can access it later with this._el["start-btn"] or this._el.startBtn.
-     * @param {Array<string>} uiKeys The UI keys of the elements to acquire. For example: ["start-btn", "score-display"]
-     * @returns {Dict<string, HTMLElement>} An object with the acquired elements, keyed by their UI keys. For example: { "start-btn": HTMLElement, "score-display": HTMLElement }
-     */
-    acquireElements(uiKeys = []) {
-        const elements = this.bindElements(uiKeys);
-        for (const [key, el] of Object.entries(elements)) {
-            const camelCaseKey = snakeCaseToCamelCase(key);
-            if (camelCaseKey !== key) {
-                elements[camelCaseKey] = el;
-            }
-        }
-        this._el = elements;
         return elements;
     }
 
@@ -229,5 +143,43 @@ export class BaseScreen {
      * @param {any} payload optional data to pass to the screen when deactivating it. For example, you could pass the current game state or user settings.
      */
     deactivate(payload = null) {
+    }
+
+    /**
+     * Add an event listener to a UI element identified by its data-ui key. The element should be inside the container of this screen.
+     * @param {string} uiKey The data-ui key of the element to add the event listener to. The uiKey must use the dot-notation to reference the element. For example: "panel.start-btn"
+     * @param {string} eventType The type of the event to listen for. For example: "click", "input", "change"
+     * @param {Function} handler The function to call when the event is triggered. It will receive the event object as its argument.
+     * @return {Function|null} A function to remove the event listener, or null if the element was not found. The returned function can be called to remove the event listener when it is no longer needed.
+     * 
+     * Example usage:
+     *  this.on("panel.start-btn", "click", (event) => {
+     *      console.log("Start button clicked!", event);
+     *  });
+     */
+    on(uiKey, eventType, handler) {
+        const element = findUIElement(uiKey, this.container);
+        if (element) {
+            element.addEventListener(eventType, handler);
+            return () => element.removeEventListener(eventType, handler);
+        }
+        else {
+            if (this.throwOnMissingElement) {
+                throw new Error(`Element "${uiKey}" not found in container for event listener`);
+            } else {
+                console.warn(`Element "${uiKey}" not found in container for event listener`);
+            }
+            return null;
+        }
+    }
+
+    /**
+     * Find a UI element by its data-ui key within the container of this screen. The uiKey must use the dot-notation to reference the element. 
+     *  For example: "panel.start-btn"
+     * @param {string} uiKey The data-ui key of the element to find. For example: "panel.start-btn"
+     * @return {HTMLElement|null} The found element, or null if not found.
+     */
+    find(uiKey) {
+        return findUIElement(uiKey, this.container);
     }
 }
