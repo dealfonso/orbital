@@ -153,15 +153,19 @@ export class BaseScreen extends OrbitalUIObject {
      * @return {Function|null} A function to remove the event listener, or null if the element was not found. The returned function can be called to remove the event listener when it is no longer needed.
      * 
      * Example usage:
-     *  this.on("panel.start-btn", "click", (event) => {
+     *  this.$on("panel.start-btn", "click", (event) => {
      *      console.log("Start button clicked!", event);
      *  });
      */
-    on(uiKey, eventType, handler) {
+    on$(uiKey, eventType, handler) {
         const element = findUIElement(uiKey, this.container);
         if (element) {
-            element.addEventListener(eventType, handler);
-            return () => element.removeEventListener(eventType, handler);
+            // As it has a data-ui attribute, we can create an OrbitalUIObject for it and use its on() method 
+            //  to add the event listener.
+            const orbitalUIObject = new OrbitalUIObject(element);
+            orbitalUIObject.on(eventType, handler);
+            
+            return () => orbitalUIObject.off(eventType, handler);
         }
         else {
             if (this.throwOnMissingElement) {

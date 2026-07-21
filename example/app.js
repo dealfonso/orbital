@@ -63,9 +63,14 @@ class MenuScreen extends BaseScreen {
   initEventListeners() {
     console.log("Initializing event listeners for MenuScreen");
 
-    this.on("menu-stars", "click", () => this.controller.state.change("stars"));
-    this.on("menu-fireworks", "click", () => this.controller.state.change("fireworks"));
-    this.on("menu-cubo", "click", () => this.controller.state.change("cubo"));
+    this.on$("menu-stars", "click", () => this.controller.state.change("stars"));
+    this.on$("menu-fireworks", "click", () => this.controller.state.change("fireworks"));
+    this.on$("menu-cubo", "click", () => this.controller.state.change("cubo"));
+    
+    // These calls are the same as the above, but using the OrbitalUIObject's on() method directly:
+    // this.ui.menuStars.on("click", () => this.controller.state.change("stars"));
+    // this.ui.menuFireworks.on("click", () => this.controller.state.change("fireworks"));
+    // this.ui.menuCubo.on("click", () => this.controller.state.change("cubo"));
   }
 }
 
@@ -76,8 +81,8 @@ class FireworksScreen extends BaseScreen {
   }
 
   initEventListeners() {
-    this.on("fireworks-back-btn", "click", () => this.controller.state.change("menu"));
-    this.on("fireworks-reload-btn", "click", () => {
+    this.on$("fireworks-back-btn", "click", () => this.controller.state.change("menu"));
+    this.on$("fireworks-reload-btn", "click", () => {
       if (this.fireworks) {
         this.fireworks.stop();
         this.fireworks.start();
@@ -108,8 +113,8 @@ class StarsScreen extends BaseScreen {
   }
 
   initEventListeners() {
-    this.on("stars-back-btn", "click", () => this.controller.state.change("menu"));
-    this.on("stars-reload-btn", "click", () => this.createStars());
+    this.on$("stars-back-btn", "click", () => this.controller.state.change("menu"));
+    this.on$("stars-reload-btn", "click", () => this.createStars());
   }
 
   activate() {
@@ -147,14 +152,14 @@ class CuboScreen extends BaseScreen {
   }
 
   initEventListeners() {
-    this.on("cubo-back-btn", "click", () => this.controller.state.change("menu"));
-    this.on("cubo-jump", "click", () => this._cuboRunner.saltar());
-    this.on("cubo-play", "click", () => {
+    this.on$("cubo-back-btn", "click", () => this.controller.state.change("menu"));
+    this.on$("cubo-jump", "click", () => this._cuboRunner.saltar());
+    this.on$("cubo-play", "click", () => {
       this._cuboRunner.iniciar();
       this.ui.cuboPlay.element.classList.add("hidden");
       this.ui.cuboJump.element.classList.remove("hidden");
     });
-    this.on("cubo-restart", "click", () => {
+    this.on$("cubo-restart", "click", () => {
       this._cuboRunner.iniciar();
       this.ui.cuboRestart.element.classList.add("hidden");
       this.ui.cuboJump.element.classList.remove("hidden");
