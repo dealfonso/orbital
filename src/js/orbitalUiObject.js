@@ -19,7 +19,7 @@ export class OrbitalUIObject {
         }
 
         if (element._orb) {
-            console.log(`Warning: The element with data-ui="${element.dataset.ui}" already has an OrbitalUIObject associated with it. Returning the existing instance.`);
+            // console.log(`Warning: The element with data-ui="${element.dataset.ui}" already has an OrbitalUIObject associated with it. Returning the existing instance.`);
             return element._orb; // Return the existing OrbitalUIObject if it already exists for this element
         }
 
