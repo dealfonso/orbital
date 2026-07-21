@@ -1,8 +1,8 @@
 import { CuboRunner } from "./cubo-runner.js";
-import { ORB } from "https://cdn.jsdelivr.net/gh/dealfonso/Orbital@main/dist/index.js";
-// import { ORB } from "./src/index.js";
+// import { ORB } from "https://cdn.jsdelivr.net/gh/dealfonso/Orbital@main/dist/index.js";
+import { ORB } from "./src/index.js";
 
-const { StateController, ScreenController, BaseScreen, I18n, findUIElement } = ORB;
+const { StateController, ScreenController, BaseScreen, I18n, findUIElement, OrbitalUIObject } = ORB;
 
 function createElement(tag, classNames = [], attributes = {}) {
     const el = document.createElement(tag);
@@ -57,30 +57,27 @@ class WelcomeScreen extends BaseScreen {
 
 class MenuScreen extends BaseScreen {
   constructor(controller) {
-    super(controller, findUIElement("menu-screen"), [
-      "menu-stars",
-      "menu-fireworks",
-      "menu-cubo"
-    ]);
+    super(controller, findUIElement("menu-screen"));
   }
 
   initEventListeners() {
     console.log("Initializing event listeners for MenuScreen");
-    this._el.menuStars.addEventListener("click", () => this.controller.state.change("stars"));
-    this._el.menuFireworks.addEventListener("click", () => this.controller.state.change("fireworks"));
-    this._el.menuCubo.addEventListener("click", () => this.controller.state.change("cubo"));
+
+    this.on("menu-stars", "click", () => this.controller.state.change("stars"));
+    this.on("menu-fireworks", "click", () => this.controller.state.change("fireworks"));
+    this.on("menu-cubo", "click", () => this.controller.state.change("cubo"));
   }
 }
 
 class FireworksScreen extends BaseScreen {
   constructor(controller) {
-    super(controller, findUIElement("fireworks-screen"), ["fireworks-container", "fireworks-back-btn", "fireworks-reload-btn"]);
+    super(controller, findUIElement("fireworks-screen"));
     this.fireworks = null;
   }
 
   initEventListeners() {
-    this._el.fireworksBackBtn.addEventListener("click", () => this.controller.state.change("menu"));
-    this._el.fireworksReloadBtn.addEventListener("click", () => {
+    this.on("fireworks-back-btn", "click", () => this.controller.state.change("menu"));
+    this.on("fireworks-reload-btn", "click", () => {
       if (this.fireworks) {
         this.fireworks.stop();
         this.fireworks.start();
@@ -91,7 +88,7 @@ class FireworksScreen extends BaseScreen {
   activate() {
     super.activate();
     if (!this.fireworks) {
-      this.fireworks = new Fireworks.default(this._el.fireworksContainer);
+      this.fireworks = new Fireworks.default(this.ui.fireworksContainer.element);
     }
     this.fireworks.start();
   }
@@ -106,13 +103,13 @@ class FireworksScreen extends BaseScreen {
 
 class StarsScreen extends BaseScreen {
   constructor(controller) {
-    super(controller, findUIElement("stars-screen"), ["stars-container", "stars-back-btn", "stars-reload-btn"]);
+    super(controller, findUIElement("stars-screen"));
     this.stars = null;
   }
 
   initEventListeners() {
-    this._el.starsBackBtn.addEventListener("click", () => this.controller.state.change("menu"));
-    this._el.starsReloadBtn.addEventListener("click", () => this.createStars());
+    this.on("stars-back-btn", "click", () => this.controller.state.change("menu"));
+    this.on("stars-reload-btn", "click", () => this.createStars());
   }
 
   activate() {
@@ -122,11 +119,11 @@ class StarsScreen extends BaseScreen {
 
   deactivate() {
     super.deactivate();
-    this._el.starsContainer.innerHTML = "";
+    this.ui.starsContainer.element.innerHTML = "";
   }
 
   createStars() {
-    this._el.starsContainer.innerHTML = "";
+    this.ui.starsContainer.element.innerHTML = "";
     for (let i = 0; i < 100; i++) {
         const s = createElement('div', ['star'].concat(['small', 'medium', 'large'][Math.floor(Math.random() * 3)]), {
             style: `
@@ -137,70 +134,70 @@ class StarsScreen extends BaseScreen {
             --star-color: hsl(${Math.random()*360} 70% 80%);
             `
         });
-        this._el.starsContainer.appendChild(s);
+        this.ui.starsContainer.element.appendChild(s);
     }
   }
 }
 
 class CuboScreen extends BaseScreen {
   constructor(controller) {
-    super(controller, findUIElement("cubo-screen"), [
-      "cubo-container", "cubo-back-btn", "cubo-jump", "cubo-play", "cubo-restart", "cubo-marcador_puntos", "cubo-marcador_mejor"]);
+    super(controller, findUIElement("cubo-screen"), );
     this._cuboRunner = null;
     this._mejorPuntuacion = 0;
   }
 
   initEventListeners() {
-    this._el.cuboBackBtn.addEventListener("click", () => this.controller.state.change("menu"));
-    this._el.cuboJump.addEventListener("click", () => this._cuboRunner.saltar());
-    this._el.cuboPlay.addEventListener("click", () => {
+    this.on("cubo-back-btn", "click", () => this.controller.state.change("menu"));
+    this.on("cubo-jump", "click", () => this._cuboRunner.saltar());
+    this.on("cubo-play", "click", () => {
       this._cuboRunner.iniciar();
-      this._el.cuboPlay.classList.add("hidden");
-      this._el.cuboJump.classList.remove("hidden");
+      this.ui.cuboPlay.element.classList.add("hidden");
+      this.ui.cuboJump.element.classList.remove("hidden");
     });
-    this._el.cuboRestart.addEventListener("click", () => {
+    this.on("cubo-restart", "click", () => {
       this._cuboRunner.iniciar();
-      this._el.cuboRestart.classList.add("hidden");
-      this._el.cuboJump.classList.remove("hidden");
+      this.ui.cuboRestart.element.classList.add("hidden");
+      this.ui.cuboJump.element.classList.remove("hidden");
     });
   }
 
   activate() {
     super.activate();
-    this._el.cuboContainer.innerHTML = "";
-    this._cuboRunner = new CuboRunner(this._el.cuboContainer, {
+    this.ui.cuboContainer.element.innerHTML = "";
+    this._cuboRunner = new CuboRunner(this.ui.cuboContainer.element, {
+      alto: this.find("cubo-container").clientHeight,
       plataformasFlotantesSolidas: true,
       dobleSalto: true,
       onFinPartida: () => {
-        this._el.cuboRestart.classList.remove("hidden");
-        this._el.cuboJump.classList.add("hidden");
+        this.ui.cuboRestart.element.classList.remove("hidden");
+        this.ui.cuboJump.element.classList.add("hidden");
 
         // Pasamos el foco al botón de reinicio para que el usuario pueda pulsar Enter para reiniciar
-        this._el.cuboRestart.focus();
+        this.ui.cuboRestart.element.focus();
 
         const puntuacion = this._cuboRunner.getPuntuacion();
         if (puntuacion > this._mejorPuntuacion) {
           this._mejorPuntuacion = puntuacion;
-          this._el.cuboMarcadorMejor.textContent = this._mejorPuntuacion;
+          this.ui.cuboMarcador.mejor.element.textContent = this._mejorPuntuacion;
         }
       },
       onPuntuacion: (puntos) => {
-        this._el.cuboMarcadorPuntos.textContent = puntos;
+        this.ui.cuboMarcador.puntos.element.textContent = puntos;
       }
     });
-    this._el.cuboMarcadorPuntos.textContent = "0";
-    this._el.cuboMarcadorMejor.textContent = this._mejorPuntuacion;
-    this._el.cuboPlay.classList.remove("hidden");
-    this._el.cuboRestart.classList.add("hidden");
-    this._el.cuboJump.classList.add("hidden");
-    this._el.cuboPlay.focus(); 
+
+    this.ui.cuboMarcador.puntos.element.textContent = "0";
+    this.ui.cuboMarcador.mejor.element.textContent = this._mejorPuntuacion;
+    this.ui.cuboPlay.element.classList.remove("hidden");
+    this.ui.cuboRestart.element.classList.add("hidden");
+    this.ui.cuboJump.element.classList.add("hidden");
+    this.ui.cuboPlay.element.focus();
 
     // Añadimos un listener para la tecla de espacio para saltar
     this._teclaEspacioListener = this.teclaEspacioListener.bind(this);
     document.addEventListener("keydown", this._teclaEspacioListener);
 
-    this._el.cuboContainer.handler = () => this._cuboRunner.saltar();
-    this._el.cuboContainer.addEventListener("click", this._el.cuboContainer.handler);
+    this.ui.cuboContainer.on("click", () => this._cuboRunner.saltar());
   }
 
   teclaEspacioListener(event) {
@@ -216,9 +213,8 @@ class CuboScreen extends BaseScreen {
       this._cuboRunner = null;
     }
     document.removeEventListener("keydown", this._teclaEspacioListener);
-    this._el.cuboContainer.removeEventListener("click", this._el.cuboContainer.handler);
-    this._el.cuboContainer.handler = null;
-    this._el.cuboContainer.innerHTML = "";
+    this.ui.cuboContainer.removeAllEventListeners("click");
+    this.ui.cuboContainer.innerHTML = "";
   }
 }
 

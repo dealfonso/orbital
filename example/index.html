@@ -16,8 +16,8 @@
   <link href="https://fonts.googleapis.com/css2?family=Changa+One:ital@0;1&display=swap" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css2?family=Righteous&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="./stars.css">
-  <!-- <link rel="stylesheet" href="./src/style.css"> -->
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/dealfonso/Orbital@main/dist/style.css">
+  <link rel="stylesheet" href="./src/style.css">
+  <!-- <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/dealfonso/Orbital@main/dist/style.css"> -->
   <style>
   :root{
     --bg-1:#150A2E;
@@ -146,6 +146,13 @@
   .cubo-container {
       width: 100%;
       margin-bottom: 1rem;
+      flex-grow: 1;
+  }
+  .orb-button-group {
+    justify-content: center;
+  }
+  .orb-screen-content {
+    overflow-y: auto;
   }
   </style>
 </head>
@@ -180,30 +187,24 @@
       </div>
     </section>
     <section data-ui="cubo-screen" class="orb-screen not-active orb-effects orb-slide-left orb-fade-in">
-      <div class="orb-screen-stacked-group">
-        <div class="orb-screen-content">
-          <div data-ui="cubo-marcador" class="cubo-marcador mt-auto">
-            <div class="cubo-marcador_item">
-              <div class="cubo-marcador_label" data-i18n="cubo.puntos">Puntos</div>
-              <div data-ui="cubo-marcador_puntos" class="cubo-marcador_valor">0</div>
-            </div>
-            <div class="cubo-marcador_item">
-              <div class="cubo-marcador_label" data-i18n="cubo.mejor">Mejor</div>
-              <div data-ui="cubo-marcador_mejor" class="cubo-marcador_valor">0</div>
-            </div>
+      <div class="orb-screen-content">
+        <div data-ui="cubo-marcador" class="cubo-marcador mt-auto">
+          <div class="cubo-marcador_item">
+            <div class="cubo-marcador_label" data-i18n="cubo.puntos">Puntos</div>
+            <div data-ui="puntos" class="cubo-marcador_valor">0</div>
           </div>
-          <div data-ui="cubo-container" class="cubo-container mt-1">
-          </div>
-          <div class="button-group mb-auto mt-1">
-            <button data-ui="cubo-jump" class="orb-btn icon-btn xxl hidden"><i class="ti ti-arrow-up"></i></button>
-            <button data-ui="cubo-restart" class="orb-btn icon-btn xxl hidden"><i class="ti ti-reload"></i></button>
-            <button data-ui="cubo-play" class="orb-btn icon-btn xxl"><i class="ti ti-control-play"></i></button>
+          <div class="cubo-marcador_item">
+            <div class="cubo-marcador_label" data-i18n="cubo.mejor">Mejor</div>
+            <div data-ui="mejor" class="cubo-marcador_valor">0</div>
           </div>
         </div>
-        <div class="orb-screen-content">
-          <div class="button-group mx-auto mt-auto">
-            <button data-ui="cubo-back-btn" class="orb-btn icon-btn"><i class="ti ti-arrow-left"></i></button>
-          </div>
+        <div data-ui="cubo-container" class="cubo-container mt-1">
+        </div>
+        <div class="orb-button-group mb-auto mt-1">
+          <button data-ui="cubo-back-btn" class="orb-btn icon-btn"><i class="ti ti-arrow-left"></i></button>
+          <button data-ui="cubo-jump" class="orb-btn icon-btn hidden"><i class="ti ti-arrow-up"></i></button>
+          <button data-ui="cubo-restart" class="orb-btn icon-btn hidden"><i class="ti ti-reload"></i></button>
+          <button data-ui="cubo-play" class="orb-btn icon-btn"><i class="ti ti-control-play"></i></button>
         </div>
       </div>
     </section>
@@ -230,6 +231,24 @@
           </div>
         </div>
       </div> 
+    </section>
+    <section data-ui="options-screen" class="orb-screen not-active orb-effects orb-slide-left orb-fade-in">
+      <div class="orb-screen-content">
+        <h2 data-i18n="options.title">Opciones</h2>
+        <p data-i18n="options.subtitle">Aquí puedes configurar las opciones de la aplicación.</p>
+        <div class="orb-options-group" data-ui="options">
+          <label for="option-volume" data-i18n="options.volume">Volumen</label>
+          <input type="range" id="option-volume" data-ui="volume" min="0" max="100" value="50">
+          <label for="option-theme" data-i18n="options.theme">Tema</label>
+          <select id="option-theme" data-ui="theme">
+            <option value="light" data-i18n="options.theme.light">Claro</option>
+            <option value="dark" data-i18n="options.theme.dark">Oscuro</option>
+          </select>
+        </div>
+        <div class="orb-button-group mt-auto">
+          <button data-ui="options-back-btn" class="orb-btn icon-btn"><i class="ti ti-arrow-left"></i></button>
+        </div>
+      </div>
     </section>
   </main>
   <script src="https://cdn.jsdelivr.net/npm/fireworks-js@2.x/dist/index.umd.js"></script>  

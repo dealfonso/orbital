@@ -1,4 +1,4 @@
-![Orbital logo](img/orbital-logo-p.png)
+![Orbital logo](img/logo-horizontal.svg)
 
 # Orbital
 
@@ -93,26 +93,42 @@ Create the screens by extending `BaseScreen` and implementing the necessary even
 
 > The library exports the `findUIElement` function to resolve the `data-ui` elements in the DOM.
 
-The `BaseScreen` constructor enables a shorthand to find elements in the DOM by their `data-ui` attribute. The third argument is an array of `uiKeys` that will be resolved inside the screen container, so you can access them later through `this._el.<uiKey>`. In the example below, the `go-about` and `go-back` buttons are resolved and stored in `this._el.goAbout` and `this._el.goBack`, respectively.
+The `BaseScreen` constructor automatically discovers the elements in the DOM by their `data-ui` attribute. The class exposes them through `this.ui`, so you can access them later through `this.ui.<uiKey>`. In the example below, the `go-about` and `go-back` buttons are resolved and stored in `this.ui.goAbout` and `this.ui.goBack`, respectively.
+
+These objects are instances of `OrbitalUIObject`, which is a wrapper around the DOM element that provides additional functionality. You can access the underlying DOM element through the `element` property, e.g., `this.ui.goAbout.element`.
 
 ```js
 class MenuScreen extends BaseScreen {
   constructor(controller) {
-    super(controller, findUIElement("menu-screen"), ["go-about"]);
+    super(controller, findUIElement("menu-screen"));
   }
   initEventListeners() {
-    this._el.goAbout.addEventListener("click", () => this.controller.state.change("about"));
+    this.ui.goAbout.addEventListener("click", () => this.controller.state.change("about"));
   }
 }
 
 class AboutScreen extends BaseScreen {
   constructor(controller) {
-    super(controller, findUIElement("about-screen"), ["go-back"]);
+    super(controller, findUIElement("about-screen"));
   }
   initEventListeners() {
-    this._el.goBack.addEventListener("click", () => this.controller.state.change("menu"));
+    this.ui.goBack.addEventListener("click", () => this.controller.state.change("menu"));
   }
 }
+```
+
+Alternatively, you can use the `on(event, callback)` method of the `OrbitalUIObject` to attach event listeners, which is a more convenient way to handle events.
+
+```js
+class MenuScreen extends BaseScreen {
+  constructor(controller) {
+    super(controller, findUIElement("menu-screen"));
+  }
+  initEventListeners() {
+    this.ui.goAbout.on("click", () => this.controller.state.change("about"));
+  }
+}
+...
 ```
 
 Finally, create the main application class that extends `ScreenController`, adds the screens, and connects the state transitions to screen visibility.
@@ -157,47 +173,74 @@ In case that you want to reset the stack and go to a specific screen you can use
 
 - `show(screenName, payload)`: to show a specific screen, hiding the current one and clearing the stack. This is useful for scenarios where you want to reset the navigation flow, such as returning to a main menu or starting a new game.
 
+## `OrbitalUIObject` class
+The `OrbitalUIObject` class is a wrapper around a DOM element that provides additional functionality for managing UI elements in the application. It allows you to discover child elements with `data-ui` attributes, attach event listeners, and manage the element's lifecycle.
+
+When creating a new `OrbitalUIObject`, you should pass the DOM element that represents the UI object. The constructor will automatically discover any child elements with `data-ui` attributes and create `OrbitalUIObject` instances for them. These child objects will be accessible through the `ui` property of the parent object in a hierarchical manner, allowing you to easily access nested UI elements.
+
+e.g.
+
+```html
+<div id="parent" data-ui="panel">
+  <button data-ui="button1">Button 1</button>
+  <button data-ui="button2">Button 2</button>
+  <div data-ui="subpanel">
+    <button data-ui="button3">Button 3</button>
+  </div>
+</div>
+```
+
+```js
+const parentElement = document.querySelector("#parent");
+const parentUIObject = new OrbitalUIObject(parentElement);
+// Access a child element with data-ui="child"
+const button1 = parentUIObject.ui.button1; // OrbitalUIObject for button1
+const button2 = parentUIObject.ui.button2; // OrbitalUIObject for button2
+const subpanel = parentUIObject.ui.subpanel; // OrbitalUIObject for subpanel
+const button3 = subpanel.ui.button3; // OrbitalUIObject for button3
+// But also...
+const button3Alt = parentUIObject.ui.subpanel.button3; // OrbitalUIObject for button3
+```
+
 ## `BaseScreen` class
 
-The `BaseScreen` class is a base class for creating screens in the application. It provides a structure for managing the screen's lifecycle, including initialization, event listeners, and cleanup.
+The `BaseScreen` class is a base class for creating screens in the application. It provides a structure for managing the screen's lifecycle, including initialization, event listeners, and cleanup. The `BaseScreen` itself is a subclass of `OrbitalUIObject`, so it inherits the functionality to discover child elements with `data-ui` attributes and manage their lifecycle.
 
-When creating a new screen, you should extend the `BaseScreen` class and implement the necessary logic for that specific screen. The constructor takes three arguments:
+When creating a new screen, you should extend the `BaseScreen` class and implement the necessary logic for that specific screen. The constructor takes four arguments:
 
 - `controller`: the `ScreenController` instance that manages the screens.
 - `element`: the DOM element representing the screen (usually obtained using `findUIElement`).
-- `uiKeys`: an array of keys that correspond to the `data-ui` attributes of the elements within the screen. These keys will be resolved and stored in `this._el` for easy access.
 - `uiElementSelectors`: an optional object that allows you to use custom css selectors to find UI elements. The keys of the objects are names that will be used to access the elements in `this._els`, and the values are the css selectors to find them.
 - `options`: an optional object that allows you to configure the screen behavior:
   - `visibleClass`: the CSS class to add to the container when the screen is shown. You can use this class to define the styles for the visible state of the screen, such as `display: block` or `opacity: 1`.
   - `hiddenClass`: the CSS class to add to the container when the screen is hidden. You can use this class to define the styles for the hidden state of the screen, such as `display: none` or `opacity: 0`.
-  - `scope`: the scope used to resolve UI elements declared in `uiKeys`. It can be either `"container"` (resolve inside `this.container` first, recommended) or `"document"` (resolve globally in the whole document).
-  - `allowGlobalIdFallback`: a boolean that enables a compatible fallback. If an element is not found in container scope by using the `data-ui` attribute, it will be searched globally by id.
-  - `preferDataUi`: a boolean that, if true, will try `data-ui` first to resolve `uiKeys`, and html `id` if not found.
 
 Example:
 
 ```js
 class MenuScreen extends BaseScreen {
   constructor(controller) {
-    super(controller, findUIElement("menu-screen"), ["go-about"], { buttons: ".orb-btn"});
+    super(controller, findUIElement("menu-screen"), { buttons: ".orb-btn"});
   }
   ...
 }
 ```
 
-In this example, we'll have the possibility to access the `go-about` button through `this._el.goAbout`, and all the buttons inside the screen through `this._els.buttons`.
+In this example, we'll have the possibility to access the `go-about` button through `this.ui.goAbout` (because of the `data-ui` attribute). But you can also access all the buttons inside the screen through `this._els.buttons`.
 
 ```js
 class MenuScreen extends BaseScreen {
   ...
   initEventListeners() {
-    this._el.goAbout.addEventListener("click", () => this.controller.state.change("about"));
+    this.ui.goAbout.element.addEventListener("click", () => this.controller.state.change("about"));
     this._els.buttons.forEach(button => {
       button.addEventListener("click", () => console.log("button clicked"));
     });
   }
 }
 ```
+
+> This is an example of how to use the `ui` and the `_els` properties, but you are advised to use 'on(event, callback)' method of the `OrbitalUIObject` to attach event listeners (on elements that have `data-ui` attributes), which is a more convenient way to handle events.
 
 ### The screen lifecycle
 
@@ -376,13 +419,11 @@ Short example:
 ```js
 class SettingsScreen extends BaseScreen {
   constructor(controller) {
-    super(controller, findUIElement("settings-screen"), ["settings-back"]);
+    super(controller, findUIElement("settings-screen"));
   }
 
   initEventListeners() {
-    this._el.settingsBack.addEventListener("click", () => {
-      this.controller.state.change("menu");
-    });
+    this.on("settings-back", "click", () => this.controller.state.change("menu"));
   }
 }
 ```
