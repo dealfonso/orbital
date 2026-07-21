@@ -423,7 +423,7 @@ class SettingsScreen extends BaseScreen {
   }
 
   initEventListeners() {
-    this.on("settings-back", "click", () => this.controller.state.change("menu"));
+    this.on$("settings-back", "click", () => this.controller.state.change("menu"));
   }
 }
 ```
