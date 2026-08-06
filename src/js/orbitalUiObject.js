@@ -1,4 +1,4 @@
-import { s2c, isElement } from "./utils.js";
+import { s2c, isElement, findUIElement } from "./utils.js";
 
 export class OrbitalUIObject {
 
@@ -114,7 +114,14 @@ export class OrbitalUIObject {
         //   If there is a conflict, we will throw an error.
         for (const key of Object.keys(discovered)) {
             if (orbitalUIObject.hasOwnProperty(key)) {
-                throw new Error(`Conflict: The key "${key}" is already present in the OrbitalUIObject for "${orbitalUIObject.uiId}".`);
+                if (orbitalUIObject[key] !== discovered[key]) {
+                    console.error(`Conflict: The key "${key}" is already present in the OrbitalUIObject for "${orbitalUIObject.uiId}".`);
+                    console.error("Existing value:", orbitalUIObject[key]);
+                    console.error("New value:", discovered[key]);
+                    throw new Error(`Conflict: The key "${key}" is already present in the OrbitalUIObject for "${orbitalUIObject.uiId}".`);
+                } else {
+                    // We are re-discovering the same child, so we can ignore this conflict.
+                }
             }
         }
         return Object.assign(orbitalUIObject, discovered);
@@ -191,5 +198,16 @@ export class OrbitalUIObject {
                 delete this._eventHandlers[eventType];
             }
         }
+    }
+
+    /**
+     * Find a child element of this.element by its data-ui attribute. The search will be scoped to this.element, so it will only find elements 
+     *  that are descendants of this.element.
+     *  For example: "panel.start-btn"
+     * @param {string} uiKey The data-ui key of the element to find. For example: "panel.start-btn"
+     * @return {HTMLElement|null} The found element, or null if not found.
+     */
+    $(uiKey) {
+        return findUIElement(uiKey, this.element);
     }
 }

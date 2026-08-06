@@ -147,7 +147,8 @@ export class BaseScreen extends OrbitalUIObject {
 
     /**
      * Add an event listener to a UI element identified by its data-ui key. The element should be inside the container of this screen.
-     * @param {string} uiKey The data-ui key of the element to add the event listener to. The uiKey must use the dot-notation to reference the element. For example: "panel.start-btn"
+     * @param {string|Array<string} uiKey The data-ui key of the element to add the event listener to. The uiKey must use the dot-notation to reference the element. For example: "panel.start-btn"
+     *      (*) You can also pass an array of uiKeys to add the same event listener to multiple elements. For example: ["panel.start-btn", "panel.stop-btn"]
      * @param {string} eventType The type of the event to listen for. For example: "click", "input", "change"
      * @param {Function} handler The function to call when the event is triggered. It will receive the event object as its argument.
      * @return {Function|null} A function to remove the event listener, or null if the element was not found. The returned function can be called to remove the event listener when it is no longer needed.
@@ -158,32 +159,46 @@ export class BaseScreen extends OrbitalUIObject {
      *  });
      */
     on$(uiKey, eventType, handler) {
-        const element = findUIElement(uiKey, this.container);
-        if (element) {
-            // As it has a data-ui attribute, we can create an OrbitalUIObject for it and use its on() method 
-            //  to add the event listener.
-            const orbitalUIObject = new OrbitalUIObject(element);
-            orbitalUIObject.on(eventType, handler);
-            
-            return () => orbitalUIObject.off(eventType, handler);
+
+        if (!Array.isArray(uiKey)) {
+            uiKey = [uiKey];
         }
-        else {
-            if (this.throwOnMissingElement) {
-                throw new Error(`Element "${uiKey}" not found in container for event listener`);
-            } else {
-                console.warn(`Element "${uiKey}" not found in container for event listener`);
+
+        const returnFunctions = [];
+
+        for (const key of uiKey) {
+            if (typeof key !== "string") {
+                throw new Error(`Invalid uiKey: ${key}. It must be a string or an array of strings.`);
             }
+
+            const element = findUIElement(key, this.container);
+            if (element) {
+                // As it has a data-ui attribute, we can create an OrbitalUIObject for it and use its on() method 
+                //  to add the event listener.
+                const orbitalUIObject = new OrbitalUIObject(element);
+                orbitalUIObject.on(eventType, handler);
+                
+                returnFunctions.push(() => orbitalUIObject.off(eventType, handler));
+            }
+            else {
+                if (this.throwOnMissingElement) {
+                    throw new Error(`Element "${key}" not found in container for event listener`);
+                } else {
+                    console.warn(`Element "${key}" not found in container for event listener`);
+                }
+            }
+        }
+
+        if (returnFunctions.length === 1) {
+            return returnFunctions[0];
+        } else if (returnFunctions.length > 1) {
+            return () => {
+                for (const removeListener of returnFunctions) {
+                    removeListener();
+                }
+            };
+        } else {
             return null;
         }
-    }
-
-    /**
-     * Find a UI element by its data-ui key within the container of this screen. The uiKey must use the dot-notation to reference the element. 
-     *  For example: "panel.start-btn"
-     * @param {string} uiKey The data-ui key of the element to find. For example: "panel.start-btn"
-     * @return {HTMLElement|null} The found element, or null if not found.
-     */
-    find(uiKey) {
-        return findUIElement(uiKey, this.container);
     }
 }

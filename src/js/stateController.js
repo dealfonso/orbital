@@ -1,10 +1,21 @@
 export class StateController {
-    static DEBUG = false;
-
-    static log(...args) {
-        if (this.DEBUG) {
-            console.log(...args);
+    _DEBUG = false;
+    
+    log(...args) {
+        if (this._DEBUG) {
+            console.log(`[${this.name}]`, ...args);
         }
+    }
+
+    set debug(value) {
+        if (typeof value !== "boolean") {
+            throw new Error("Debug value must be a boolean");
+        }
+        this._DEBUG = value;
+    }
+
+    get debug() {
+        return this._DEBUG;
     }
 
     /**
@@ -90,12 +101,44 @@ export class StateController {
 
     /**
      * Creates a new StateController instance
+     * @param {string|null} name Optional name for the StateController instance. If not provided, a default name will be generated.
      */
-    constructor() {
+    constructor(name = null) {
         this.state = null;
         this.callbacks = {};
         this.transitions = {};
         this.stateTime = null;
+        if (name === null) {
+            name = `StateController-${Date.now()}`;
+        }
+        this.name = name;
+    }
+
+    /**
+     * Returns the current state of the controller.
+     * @returns {string|null} The current state or null if not set.
+     */
+    get currentState() {
+        return this.state;
+    }
+
+    /**
+     * Returns the time spent in the current state.
+     * @returns {number} The time in milliseconds.
+     */
+    get timeInCurrentState() {
+        if (this.stateTime === null) {
+            return 0;
+        }
+        return Date.now() - this.stateTime;
+    }
+
+    /**
+     * Returns the time spent in the current state in seconds.
+     * @returns {number} The time in seconds.
+     */
+    get timeInCurrentStateSeconds() {
+        return this.timeInCurrentState / 1000;
     }
 
     /**
@@ -106,6 +149,9 @@ export class StateController {
      * @param {string} state
      * @param {function(string, string, StateController)} callback
      * @return {function()} a function that can be called to unregister the callback.
+     * 
+     * (*) Note: The callback will be called asynchronously after the state change is complete, to ensure that the state change is fully processed before the callback is executed.
+     *      This is important to avoid issues where the callback tries to change the state again before the previous state change is complete.
      */
     on(event, state, callback) {
         if (!this.callbacks) {
@@ -117,7 +163,6 @@ export class StateController {
         this.callbacks[`${event}:${state}`].push(callback);
         return () => this.off(event, state, callback);
     }
-
 
     /**
      * Unregister a callback function for the specified state.
@@ -188,78 +233,109 @@ export class StateController {
      * @param  {...any} args 
      */
     emit(event, state, ...args) {
+        const callbacksToCall = [];
+
         if (this.callbacks && this.callbacks[`${event}:${state}`]) {
-            StateController.log(`Emitting event "${event}" for state "${state}" with args:`, args);
+            this.log(`Emitting event "${event}" for state "${state}" with args:`, args);
             this.callbacks[`${event}:${state}`].forEach(callback => {
-                try {
-                    callback(...args);
-                } catch (error) {
-                    console.error(`Error in callback for state ${state}:`, error);
-                }
+                callbacksToCall.push(callback);
             });
         }
         if (this.callbacks && this.callbacks[`${event}:*`]) {
-            StateController.log(`Emitting event "${event}" for state "${state}" with args:`, args);
+            this.log(`Emitting event "${event}" for state "${state}" with args:`, args);
             this.callbacks[`${event}:*`].forEach(callback => {
+                callbacksToCall.push(callback);
+            });
+        }
+
+        // Call the callbacks asynchronously to avoid blocking the main thread and to ensure that the state change is fully processed before the callbacks are executed.
+        setTimeout(() => {
+            callbacksToCall.forEach(callback => {
                 try {
+                    this.log(`Calling callback for event "${event}" and state "${state}" with args:`, args);
                     callback(...args);
                 } catch (error) {
                     console.error(`Error in callback for state ${state}:`, error);
                 }
             });
-        }
+        }, 0);
     }
 
     /**
      * Force the state to a new value, regardless of valid transitions.
      * @param {string} newState 
+     * @param {Object} [data] Optional data to pass to the callbacks.
      * @param {boolean} callCallbacks: If true, the callbacks for the new state (and for "*") will be called (if needed). If false, the callbacks will not be called.
      */
-    forceState(newState, callCallbacks = false) {
-        StateController.log(`Forcing state from ${this.state} to ${newState}`);
+    forceState(newState, data = null, callCallbacks = false) {
+        this.log(`Forcing state from ${this.state} to ${newState}`);
         const prevState = this.state;
         if (callCallbacks) {
-            this.emit("leave", this.state, prevState, newState, this);
+            this.emit("leave", this.state, data, prevState, newState, this);
         }
         this.state = newState;
         this.stateTime = Date.now();
         if (callCallbacks) {
-            this.emit("enter", newState, prevState, newState, this);
+            this.emit("enter", newState, data, prevState, newState, this);
         }
     }
 
     /**
      * Change the current state to the specified new state. If the transition from the current state to the new state is valid according to the defined transitions, the state will be updated and the registered callbacks for the new state (and for "*") will be called.
      * 
-     * @param {string} newState 
+     * @param {string} newState
+     * @param {Object} [data] Optional data to pass to the callbacks.
      * @returns {boolean} true if the state was changed, false if the transition was invalid or if the new state is the same as the current state.
      */
-    change(newState) {
-        StateController.log(`Changing state from ${this.state} to ${newState}`);
+    change(newState, data = null) {
+        this.log(`Changing state from ${this.state} to ${newState}`);
         if (newState === this.state) {
+            this.log(`State unchanged: ${newState}`);
             return false; // No hacemos nada si el estado no cambia
         }
+
+        let isValidTransition = true;
 
         // This is the case when the state is null, which means this is the first time we are setting the state.
         //  In this case, we don't need to validate the transition.
         if (this.state === null) {
-            StateController.log(`Initial state set to ${newState}`);
+            this.log(`Initial state set to ${newState}`);
             this.state = newState;
             this.stateTime = Date.now();
-            this.emit("enter", newState, null, newState, this);
-            return true;
-        }
-
-        if (this.validateTransition(this.state, newState)) {
-            const prevState = this.state;
-            this.emit("leave", this.state, prevState, newState, this);
-            this.state = newState;
-            this.stateTime = Date.now();
-            this.emit("enter", newState, prevState, newState, this);
-            return true;
+            this.emit("enter", newState, data, null, newState, this);
         } else {
-            console.warn(`Invalid state transition from ${this.state} to ${newState}`);
+            if (this.validateTransition(this.state, newState)) {
+                const prevState = this.state;
+                this.emit("leave", this.state, data, prevState, newState, this);
+                this.state = newState;
+                this.stateTime = Date.now();
+                this.emit("enter", newState, data, prevState, newState, this);
+            } else {
+                console.warn(`Invalid state transition from ${this.state} to ${newState}`);
+                isValidTransition = false;
+            }
         }
-        return false;
+        if (isValidTransition) {
+            this.log(`State changed to ${newState}`);
+        }
+        return isValidTransition;
+    }
+
+    /**
+     * Resets the state controller to its initial state, clearing the current state and state time. This does not affect the defined transitions or registered callbacks.
+     *  - After calling this method, the state will be null and the state time will be null.
+     *  - This method does not emit any events or call any callbacks.
+     *  - This method does not validate the transitions or check for valid states.
+     *  - This method does not change the defined transitions or registered callbacks.
+     *  - This method does not change the current state or state time if they are already null.
+     *  - This method does not affect the ability to change the state later using the `change` method.
+     *  - This method does not affect the ability to force the state later using the `forceState` method.
+     *  - This method does not affect the ability to register new callbacks later using the `on`, `onEnter`, `onLeave`, or `onState` methods.
+     *  - This method does not affect the ability to unregister callbacks later using the `off` method.
+     */
+    reset() {
+        this.log(`Resetting state controller from ${this.state} to null`);
+        this.state = null;
+        this.stateTime = null;
     }
 };

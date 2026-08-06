@@ -69,6 +69,12 @@ export function getValueWithVariance(base, variance = 0) {
     return base + randomVariance;
 }
 
+/**
+ * Escapes a string for use in a CSS selector. This is necessary when using special characters in selectors, such as when using data attributes 
+ *  with special characters.
+ * @param {string} value - The string to escape.
+ * @returns {string} The escaped string.
+ */
 export function escapeCssValue(value) {
     if (typeof CSS !== "undefined" && typeof CSS.escape === "function") {
         return CSS.escape(value);
@@ -76,11 +82,23 @@ export function escapeCssValue(value) {
     return String(value).replace(/\\/g, "\\\\").replace(/\"/g, '\\\"');
 }
 
+/**
+ * Finds the nearest ancestor of an element that has a data-ui attribute. If the element itself has a data-ui attribute, it will return that element.
+ * @param {HTMLElement} element - The element to start the search from.
+ * @returns {HTMLElement|null} The nearest ancestor with a data-ui attribute, or null if none is found.
+ */
 function getNearestDataUiAncestor(element) {
     const parent = element.parentElement;
     return parent ? parent.closest("[data-ui]") : null;
 }
 
+/**
+ * Finds a UI element by its data-ui attribute within a specified root, ensuring that the element is a descendant of the root and 
+ *   respects the hierarchy of data-ui attributes.
+ * @param {string} part - The data-ui value to search for.
+ * @param {HTMLElement|Document} root - The root node to start the search from.
+ * @returns {HTMLElement|null} The found element or null if not found.
+ */
 function findScopedUIElement(part, root) {
     const escapedPart = escapeCssValue(part);
     const candidates = root.querySelectorAll(`[data-ui="${escapedPart}"]`);
@@ -152,4 +170,14 @@ export function findUIElement(uiId, root = document) {
 
 export function isElement(value) {
     return value && typeof value === "object" && value.nodeType === Node.ELEMENT_NODE;
+}
+
+/**
+ * Creates a deep clone of an object. This function uses JSON serialization to create a new object with the same properties and values as the original.
+ * Note: This method does not preserve functions, undefined, or special object types (like Date, Map, Set, etc.). It is suitable for plain objects and arrays.
+ * @param {Object} obj - The object to clone.
+ * @returns {Object} A deep clone of the original object.
+ */
+export function cloneObject(obj) {
+    return JSON.parse(JSON.stringify(obj));
 }

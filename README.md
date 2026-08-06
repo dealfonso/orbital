@@ -279,7 +279,7 @@ That means that from the `menu` state you can go to the `about` state, and from 
 
 ### Changing states
 
-When using the `change(newState, payload)` method, the `StateController` will check if the transition from the current state to the `newState` is valid. 
+When using the `change(newState, data = null)` method, the `StateController` will check if the transition from the current state to the `newState` is valid. 
 
 If a state transition is valid, it will trigger a _leave_ event for the current state and an _enter_ event for the new state (in the `StateController` events system). 
 
@@ -287,7 +287,7 @@ To listen to these events, you can use the `on("enter", state, callback)` and `o
 
 The callback functions for these events will have the following signature:
 
-- `callback(prevState, newState, controller)`: where `newState` is the state being entered, `prevState` is the state being left, and `controller` is the instance of the `StateController`.
+- `callback(data, prevState, newState, controller)`: where `data` is the data passed to the event, `newState` is the state being entered, `prevState` is the state being left, and `controller` is the instance of the `StateController`.
 
 > To keep the state machine predictable, you should always navigate through state changes, and showing or hiding screens according to the state transitions instead of directly manipulating the DOM. This ensures that the application flow is consistent and that screens are only shown when the state allows it.
 

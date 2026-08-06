@@ -14,7 +14,7 @@ import { ModalDialog } from "./js/modalDialog.js";
 import { findUIElement } from "./js/utils.js";
 import { OrbitalUIObject } from "./js/orbitalUiObject.js";
 
-export const version = "1.2.0";
+export const version = "1.3.0";
 
 export const ORB = Object.freeze({
 	BaseScreen,
