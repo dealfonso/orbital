@@ -11,6 +11,12 @@
   overflow-y: auto;
   overscroll-behavior: contain;
   transition: all 300ms ease;
+
+  /** Safe area insets for devices with notches or rounded corners **/
+  top: env(safe-area-inset-top, 0px) !important;
+  left: env(safe-area-inset-left, 0px) !important;
+  right: env(safe-area-inset-right, 0px) !important;
+  bottom: env(safe-area-inset-bottom, 0px) !important;
 }
 
 .orb-screen.not-active {

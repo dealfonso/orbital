@@ -5,6 +5,7 @@ export { StateController } from "./js/stateController.js";
 export { ModalDialog } from "./js/modalDialog.js";
 export { OrbitalUIObject } from "./js/orbitalUiObject.js";
 export { findUIElement } from "./js/utils.js";
+export { KeepAwake } from "./js/keepAwake.js";
 
 import { BaseScreen } from "./js/baseScreen.js";
 import { I18n } from "./js/i18n.js";
@@ -13,8 +14,9 @@ import { StateController } from "./js/stateController.js";
 import { ModalDialog } from "./js/modalDialog.js";
 import { findUIElement } from "./js/utils.js";
 import { OrbitalUIObject } from "./js/orbitalUiObject.js";
+import { KeepAwake } from "./js/keepAwake.js";
 
-export const version = "1.3.0";
+export const version = "1.3.1";
 
 export const ORB = Object.freeze({
 	BaseScreen,
@@ -24,6 +26,7 @@ export const ORB = Object.freeze({
 	ModalDialog,
     findUIElement,
     OrbitalUIObject,
+	KeepAwake,
 	version,
 });
 

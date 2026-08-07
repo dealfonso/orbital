@@ -210,4 +210,43 @@ export class OrbitalUIObject {
     $(uiKey) {
         return findUIElement(uiKey, this.element);
     }
+
+    /**
+     * Request fullscreen for this.element. If the element is already in fullscreen, it will exit fullscreen first.
+     * This method will attempt to use the standard Fullscreen API, and will also handle vendor-prefixed versions for Safari and IE11.
+     * Note: Some browsers may require user interaction (like a click) to allow fullscreen mode.
+     * @returns {Promise<void>} A promise that resolves when the request is complete.
+     * @throws {Error} If the browser does not support fullscreen or if the request fails.
+     * @example
+     *  const orb = new OrbitalUIObject(document.getElementById("myElement"));
+     *  orb.enterFullscreen();
+     */
+    enterFullscreen() {
+        const elem = this.element;
+        if (document.fullscreenElement) {
+            document.exitFullscreen();
+        }
+        if (elem.requestFullscreen) {
+            return elem.requestFullscreen();
+        } else if (elem.webkitRequestFullscreen) { /* Safari */
+            return elem.webkitRequestFullscreen();
+        } else if (elem.msRequestFullscreen) { /* IE11 */
+            return elem.msRequestFullscreen();
+        }
+    }
+
+    /**
+     * Exit fullscreen mode if this.element is currently in fullscreen.
+     * This method will attempt to use the standard Fullscreen API, and will also handle vendor-prefixed versions for Safari and IE11.
+     * @returns {Promise<void>} A promise that resolves when the exit request is complete.
+     * @throws {Error} If the browser does not support fullscreen or if the exit request fails.
+     * @example
+     *  const orb = new OrbitalUIObject(document.getElementById("myElement"));
+     *  orb.exitFullscreen();
+     */
+    exitFullscreen() {
+        if (document.fullscreenElement === this.element) {
+            return document.exitFullscreen();
+        }
+    }
 }
