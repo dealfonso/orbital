@@ -492,3 +492,30 @@ To help styling buttons, there are several variables that you can customize for 
 }
 ```
 
+# Other features
+
+The library also includes a `Modal` class to create modal dialogs, and a `KeepAwake` class to prevent the device from going to sleep while the application is running. These features are not covered in this README, but you can find more information in the source code and examples provided in the repository.
+
+## KeepAwake
+
+The `KeepAwake` class is a utility that helps prevent the device from going to sleep while the application is running. This is particularly useful for applications that require continuous user interaction or display, such as games or media players.
+
+It has the following methods:
+
+- `isSupported()`: returns a boolean indicating whether the KeepAwake feature is supported by the current browser.
+- `isActive()`: returns a boolean indicating whether the KeepAwake feature is currently active.
+- `activate()`: activates the KeepAwake feature, preventing the device from going to sleep.
+- `release()`: deactivates the KeepAwake feature, allowing the device to go to sleep as normal.
+
+Example usage:
+
+```js
+const keepAwakeController = KeepAwake.getInstance();
+if (keepAwakeController.isSupported()) {
+  keepAwakeController.activate();
+  // Do something that requires the device to stay awake
+  // ...
+  // When done, release the KeepAwake feature
+  keepAwakeController.release();
+}
+```

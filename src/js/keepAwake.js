@@ -1,4 +1,18 @@
 export class KeepAwake {
+
+  static instance = null;
+
+  /**
+   * Returns the singleton instance of the KeepAwake class.
+   * @returns {KeepAwake} The singleton instance.
+   */
+  static getInstance() {
+    if (!KeepAwake.instance) {
+      KeepAwake.instance = new KeepAwake();
+    }
+    return KeepAwake.instance;
+  }
+
   constructor() {
     this._sentinel = null;
     this._shouldBeActive = false;
