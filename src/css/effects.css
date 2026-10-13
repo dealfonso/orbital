@@ -7,6 +7,13 @@
 .orb-effects {
     animation: var(--fade-animation, none), var(--slide-animation, none), var(--scale-animation, none), var(--shake-animation, none), var(--rotate-center-animation, none);
 }
+.orb-effects > * {
+    --fade-animation: none;
+    --slide-animation: none;
+    --scale-animation: none;
+    --shake-animation: none;
+    --rotate-center-animation: none;
+}
 .orb-fade-in {
     --fade-animation: fadeIn var(--animation-duration, 0.22s) ease;
 }
@@ -52,21 +59,18 @@
     --slide-distance: calc(var(--slide-distance, 60px) * 0.5); /* Distancia de desplazamiento para los efectos débiles */
 }
 .orb-shake {
-    animation: shake var(--animation-duration, 0.22s) ease-in-out;
+    --shake-animation: shake var(--animation-duration, 0.5s) ease-in-out;
 }
 .orb-fast {
-    animation-duration: 0.25s; /* Duración de la animación para el efecto de sacudida rápida */
+    --animation-duration: 0.25s; /* Duración de la animación para el efecto de sacudida rápida */
 }
 .orb-slow {
-    animation-duration: 1s; /* Duración de la animación para el efecto de sacudida lenta */
-}
-.orb-fast {
-    --animation-duration: 0.20s; /* Duración de la animación para el efecto rápido */
+    --animation-duration: 0.75s; /* Duración de la animación para el efecto de sacudida lenta */
 }
 .orb-very-fast {
     --animation-duration: 0.10s; /* Duración de la animación para el efecto muy rápido */
 }
-.orb-slow {
+.orb-slower {
     --animation-duration: 1s; /* Duración de la animación para el efecto lento */
 }
 .orb-very-slow {

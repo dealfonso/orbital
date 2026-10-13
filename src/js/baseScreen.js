@@ -23,29 +23,11 @@ export class BaseScreen extends OrbitalUIObject {
      *          The keys will be stored as property names in this._els, as Arrays[HTMLElement]. So that you can access them later with 
      *          this._els.startBtn or this._els["startBtn"] or this._els["modeButtons"]. Each of them will be an array of elements matching the selector). This is useful for acquiring multiple elements with the same class or data attribute, such as buttons for different game modes.
      */
-    constructor(controller, baseContainer, uiElementSelectors = {}, options = {}) {
-        super(baseContainer);
+    constructor(element, controller, uiElementSelectors = {}, options = {}) {
+        super(element, controller);
 
-        this.controller = controller;
         this.options = { ...defaultOptions, ...options };
-        this.container = baseContainer;
-        this._initialized = false;
-
         this.acquireElementsBySelector(uiElementSelectors);
-    }
-
-    /**
-     * Initialize the screen. This method should be called after creating an instance of the screen to set up event listeners and any other 
-     *  necessary initialization logic. For example, you could call this method in the constructor of the subclass after calling super(), or 
-     *  you could call it separately after creating an instance of the screen.
-     */
-    init() {
-        // Avoid re-initializing the screen if it has already been initialized. 
-        //  This is useful if you want to call init() multiple times, for example, if you want to re-initialize the screen after it has been hidden and shown again.
-        if (!this._initialized) {
-            this._initialized = true;
-            this.initEventListeners();
-        }
     }
 
     /**
@@ -61,8 +43,8 @@ export class BaseScreen extends OrbitalUIObject {
         if (!this._initialized) {
             this.init();
         }
-        this.options.visibleClass.split(" ").forEach(cls => this.container.classList.add(cls));
-        this.options.hiddenClass.split(" ").forEach(cls => this.container.classList.remove(cls));
+        this.options.visibleClass.split(" ").forEach(cls => this.element.classList.add(cls));
+        this.options.hiddenClass.split(" ").forEach(cls => this.element.classList.remove(cls));
         this.activate(payload);
     }
 
@@ -75,8 +57,8 @@ export class BaseScreen extends OrbitalUIObject {
      */
     hide(payload = null) {
         this.deactivate(payload);
-        this.options.visibleClass.split(" ").forEach(cls => this.container.classList.remove(cls));
-        this.options.hiddenClass.split(" ").forEach(cls => this.container.classList.add(cls));
+        this.options.visibleClass.split(" ").forEach(cls => this.element.classList.remove(cls));
+        this.options.hiddenClass.split(" ").forEach(cls => this.element.classList.add(cls));
     }
 
     /**
@@ -90,7 +72,7 @@ export class BaseScreen extends OrbitalUIObject {
     bindElementsBySelector(selectors = {}) {
         const elements = {};
         for (const [key, selector] of Object.entries(selectors)) {
-            const els = this.container.querySelectorAll(selector);
+            const els = this.element.querySelectorAll(selector);
             if (els.length === 0) {
                 console.warn(`No elements found for selector "${selector}"`);
             }
@@ -122,14 +104,6 @@ export class BaseScreen extends OrbitalUIObject {
     }
 
     /**
-     * Initialize event listeners for the screen. This method should be implemented by subclasses to define the specific event 
-     *  listeners for the screen's UI elements. For example, you could add click event listeners to buttons or input event listeners 
-     *  to form fields.
-     */
-    initEventListeners() {
-    }
-
-    /**
      * Activate the screen. This method can be used to start any animations, timers, or other dynamic content that should run when the screen is shown.
      *  It can also be used to reset the state of the screen if necessary. This method is called at the end of the show() method, after the screen is made visible.
      * @param {any} payload optional data to pass to the screen when activating it. For example, you could pass the current game state or user settings.
@@ -143,62 +117,5 @@ export class BaseScreen extends OrbitalUIObject {
      * @param {any} payload optional data to pass to the screen when deactivating it. For example, you could pass the current game state or user settings.
      */
     deactivate(payload = null) {
-    }
-
-    /**
-     * Add an event listener to a UI element identified by its data-ui key. The element should be inside the container of this screen.
-     * @param {string|Array<string} uiKey The data-ui key of the element to add the event listener to. The uiKey must use the dot-notation to reference the element. For example: "panel.start-btn"
-     *      (*) You can also pass an array of uiKeys to add the same event listener to multiple elements. For example: ["panel.start-btn", "panel.stop-btn"]
-     * @param {string} eventType The type of the event to listen for. For example: "click", "input", "change"
-     * @param {Function} handler The function to call when the event is triggered. It will receive the event object as its argument.
-     * @return {Function|null} A function to remove the event listener, or null if the element was not found. The returned function can be called to remove the event listener when it is no longer needed.
-     * 
-     * Example usage:
-     *  this.$on("panel.start-btn", "click", (event) => {
-     *      console.log("Start button clicked!", event);
-     *  });
-     */
-    on$(uiKey, eventType, handler) {
-
-        if (!Array.isArray(uiKey)) {
-            uiKey = [uiKey];
-        }
-
-        const returnFunctions = [];
-
-        for (const key of uiKey) {
-            if (typeof key !== "string") {
-                throw new Error(`Invalid uiKey: ${key}. It must be a string or an array of strings.`);
-            }
-
-            const element = findUIElement(key, this.container);
-            if (element) {
-                // As it has a data-ui attribute, we can create an OrbitalUIObject for it and use its on() method 
-                //  to add the event listener.
-                const orbitalUIObject = new OrbitalUIObject(element);
-                orbitalUIObject.on(eventType, handler);
-                
-                returnFunctions.push(() => orbitalUIObject.off(eventType, handler));
-            }
-            else {
-                if (this.throwOnMissingElement) {
-                    throw new Error(`Element "${key}" not found in container for event listener`);
-                } else {
-                    console.warn(`Element "${key}" not found in container for event listener`);
-                }
-            }
-        }
-
-        if (returnFunctions.length === 1) {
-            return returnFunctions[0];
-        } else if (returnFunctions.length > 1) {
-            return () => {
-                for (const removeListener of returnFunctions) {
-                    removeListener();
-                }
-            };
-        } else {
-            return null;
-        }
     }
 }

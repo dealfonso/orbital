@@ -1,14 +1,14 @@
 import { s2c, isElement, findUIElement } from "./utils.js";
+import { ScreenController } from "./screenController.js";
 
 export class OrbitalUIObject {
 
     /**
      * Create a new OrbitalUIObject instance. The element must have a data-ui attribute, which will be used as the unique identifier for this object.
      * @param {HTMLElement} element The element to wrap in an OrbitalUIObject. It must have a data-ui attribute.
-     * @param {boolean} selfDiscover If true, the constructor will automatically discover child elements with data-ui attributes and 
-     *  create OrbitalUIObject instances for them. If false, you can call discoverChildren() later to do this manually.
+     * @param {Object} controller The controller instance that will manage this UI object.
      */
-    constructor(element) {
+    constructor(element, controller = null) {
         if (!isElement(element)) {
             throw new Error("The provided value is not a valid HTMLElement.");
         }
@@ -17,6 +17,13 @@ export class OrbitalUIObject {
         if (!element || !element.dataset || !element.dataset.ui) {
             throw new Error("The provided element does not have a data-ui attribute.");
         }
+
+        // If a controller is provided, make sure it is a descendant of ScreenController, otherwise throw an error
+        if (!controller || !(controller instanceof ScreenController)) {
+            throw new Error("The provided controller is not an instance of ScreenController.");
+        }
+
+        this._controller = controller;
 
         if (element._orb) {
             // console.log(`Warning: The element with data-ui="${element.dataset.ui}" already has an OrbitalUIObject associated with it. Returning the existing instance.`);
@@ -33,8 +40,14 @@ export class OrbitalUIObject {
         this._eventHandlers = {};
         this._ui = null; // This will hold the discovered child OrbitalUIObjects, if any. It will be populated by discoverChildren() or discover().
 
+        this._initialized = false; // This flag will be set to true when init() is called, to prevent re-initialization.
+
         // Store a reference to this OrbitalUIObject in the element itself, so we can retrieve it later if needed.
         element._orb = this; // Store a reference to this OrbitalUIObject in the element itself, so we can retrieve it later if needed.
+    }
+
+    get controller() {
+        return this._controller;
     }
 
     /**
@@ -81,7 +94,7 @@ export class OrbitalUIObject {
      *  }
      * }
      */
-    static discoverChildren(element) {
+    static discoverChildren(element, controller = null) {
         // Now we will find all child elements of this.element that have a data-ui attribute, and create OrbitalUIObject instances for them.
         const childElements = element.querySelectorAll("[data-ui]");
         const discovered = {};
@@ -91,7 +104,7 @@ export class OrbitalUIObject {
             if (nearestDataUiAncestor !== element) {
                 continue;
             }
-            const childUiObject = OrbitalUIObject.discover(child);
+            const childUiObject = OrbitalUIObject.discover(child, controller);
             const camelId = s2c(childUiObject.uiId);
             discovered[camelId] = childUiObject;
         }
@@ -106,9 +119,9 @@ export class OrbitalUIObject {
      * @return {OrbitalUIObject} An object with the OrbitalUIObject for the element and its children, keyed by their data-ui values.
      * @throws {Error} If there is a conflict between the keys of the OrbitalUIObject and its children, an error will be thrown.
      */
-    static discover(element) {
-        const orbitalUIObject = new OrbitalUIObject(element);
-        const discovered = OrbitalUIObject.discoverChildren(element);
+    static discover(element, controller = null) {
+        const orbitalUIObject = new OrbitalUIObject(element, controller);
+        const discovered = OrbitalUIObject.discoverChildren(element, controller);
 
         // Let's verify that the discovered object do not hide any keys that are already present in the orbitalUIObject, to avoid overwriting them. 
         //   If there is a conflict, we will throw an error.
@@ -140,7 +153,7 @@ export class OrbitalUIObject {
         if (!this._eventHandlers[eventType]) {
             this._eventHandlers[eventType] = function(event) {
                 for (const handler of this._eventListeners[eventType] || []) {
-                    handler(event);
+                    handler.call(this, event, this);
                 }
             }.bind(this);
             this.element.addEventListener(eventType, this._eventHandlers[eventType]);
@@ -212,6 +225,22 @@ export class OrbitalUIObject {
     }
 
     /**
+     * Find a child element of this.element by its data-ui attribute. The search will be scoped to this.element, so it will only find elements 
+     *  that are descendants of this.element.
+     *  For example: "panel.start-btn"
+     * @param {string} uiKey The data-ui key of the element to find. For example: "panel.start-btn"
+     * @return {OrbitalUIObject|null} The found OrbitalUIObject, or null if not found.
+     */
+    find(uiKey) {
+        const element = this.$(uiKey);
+        if (element) {
+            return new OrbitalUIObject(element, this.controller);
+        } else {
+            return null;
+        }
+    }
+
+    /**
      * Request fullscreen for this.element. If the element is already in fullscreen, it will exit fullscreen first.
      * This method will attempt to use the standard Fullscreen API, and will also handle vendor-prefixed versions for Safari and IE11.
      * Note: Some browsers may require user interaction (like a click) to allow fullscreen mode.
@@ -249,4 +278,81 @@ export class OrbitalUIObject {
             return document.exitFullscreen();
         }
     }
+
+
+    /**
+     * Initialize the object. This method should be called after creating an instance of the screen to set up event listeners and any other 
+     *  necessary initialization logic. For example, you could call this method in the constructor of the subclass after calling super(), or 
+     *  you could call it separately after creating an instance of the screen.
+     */
+    init() {
+        // Avoid re-initializing the screen if it has already been initialized. 
+        //  This is useful if you want to call init() multiple times, for example, if you want to re-initialize the screen after it has been hidden and shown again.
+        if (!this._initialized) {
+            this._initialized = true;
+            this.initEventListeners();
+        }
+    }
+
+    /**
+     * Initialize event listeners for the screen. This method should be implemented by subclasses to define the specific event 
+     *  listeners for the screen's UI elements. For example, you could add click event listeners to buttons or input event listeners 
+     *  to form fields.
+     */
+    initEventListeners() {
+    }    
+
+    /**
+     * Add an event listener to a UI element identified by its data-ui key. The element should be inside the container of this screen.
+     * @param {string|Array<string} uiKey The data-ui key of the element to add the event listener to. The uiKey must use the dot-notation to reference the element. For example: "panel.start-btn"
+     *      (*) You can also pass an array of uiKeys to add the same event listener to multiple elements. For example: ["panel.start-btn", "panel.stop-btn"]
+     * @param {string} eventType The type of the event to listen for. For example: "click", "input", "change"
+     * @param {Function} handler The function to call when the event is triggered. It will receive the event object as its argument.
+     * @return {Function|null} A function to remove the event listener, or null if the element was not found. The returned function can be called to remove the event listener when it is no longer needed.
+     * 
+     * Example usage:
+     *  this.$on("panel.start-btn", "click", (event) => {
+     *      console.log("Start button clicked!", event);
+     *  });
+     */
+    on$(uiKey, eventType, handler) {
+        if (!Array.isArray(uiKey)) {
+            uiKey = [uiKey];
+        }
+
+        const returnFunctions = [];
+
+        for (const key of uiKey) {
+            if (typeof key !== "string") {
+                throw new Error(`Invalid uiKey: ${key}. It must be a string or an array of strings.`);
+            }
+            const element = findUIElement(key, this.element);
+            if (element) {
+                // As it has a data-ui attribute, we can create an OrbitalUIObject for it and use its on() method 
+                //  to add the event listener.
+                const orbitalUIObject = new OrbitalUIObject(element, this.controller);
+                orbitalUIObject.on(eventType, handler);
+                returnFunctions.push(() => orbitalUIObject.off(eventType, handler));
+            }
+            else {
+                if (this.throwOnMissingElement) {
+                    throw new Error(`Element "${key}" not found in container for event listener`);
+                } else {
+                    console.warn(`Element "${key}" not found in container for event listener`);
+                }
+            }
+        }
+
+        if (returnFunctions.length === 1) {
+            return returnFunctions[0];
+        } else if (returnFunctions.length > 1) {
+            return () => {
+                for (const removeListener of returnFunctions) {
+                    removeListener();
+                }
+            };
+        } else {
+            return null;
+        }
+    }    
 }

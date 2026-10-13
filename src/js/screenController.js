@@ -4,6 +4,10 @@ export class ScreenController {
         this.stack = [];
     }
 
+    get screenCount() {
+        return this.stack.length;
+    }
+
     /**
      * Add a new screen to the controller.
      * @param {string} name - The name of the screen.
