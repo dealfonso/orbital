@@ -112,6 +112,32 @@ export class StateController {
             name = `StateController-${Date.now()}`;
         }
         this.name = name;
+
+        // The states array is used to manage the states as a stack, allowing for "back" functionality. The last state in the array 
+        //  is the current state, and the previous states are stored in the array for potential future use. Each element in the array 
+        //  is an object with the following properties:
+        // - state: The name of the state (string)
+        // - data: Optional data associated with the state (object)
+        // - timestamp: The time when the state was entered (number, milliseconds since epoch)
+        this.statesStack = [];
+    }
+
+    /**
+     * Returns true if the state controller can go back to the previous state, false otherwise. The controller can go back if there is at 
+     *  least one previous state in the states array, the current state is not null, the current state is not the first state in the states 
+     *  array, the current state is not the last state in the states array and there is a valid transition from the current state to the previous state.
+     * @returns {boolean} true if the controller can go back, false otherwise.
+     */
+    canGoBack() {
+        // We can go back if there is at least one previous state in the states array, the current state is not null, 
+        //  the current state is not the first state in the states array, the current state is not the last state in 
+        //  the states array and there is a valid transition from the current state to the previous state.
+        if (this.statesStack.length < 2) {
+            return false;
+        }
+        const currentState = this.state;
+        const previousState = this.statesStack[this.statesStack.length - 2];
+        return currentState !== null && currentState !== previousState && this.validateTransition(currentState, previousState.state);
     }
 
     /**
@@ -280,6 +306,60 @@ export class StateController {
         }
     }
 
+    /** 
+     * Changes the current state to the specified new state, clearing the state stack so that it only contains the current state. 
+     * @param {string} newState
+     * @param {Object} [data] Optional data to pass to the callbacks.
+     * @returns {boolean} true if the state was changed, false if the transition was invalid or if the new state is the same as the current state.
+     */
+    change(newState, data = null) {
+        this.statesStack = []; // Clear the state stack
+        const changed = this._change(newState, data);
+        if (changed) {
+            // If the state was changed, we push the new state to the statesStack array.
+            this.statesStack.push({ state: newState, data: data, timestamp: Date.now() });
+        }
+        return changed;
+    }
+
+    /**
+     * Changes the current state to the specified new state, pushing the new state onto the statesStack array. This allows for "back" functionality, 
+     *  where the controller can return to previous states (if possible) using the `goBack` method.
+     * @param {string} newState
+     * @param {Object} [data] Optional data to pass to the callbacks.
+     * @returns {boolean} true if the state was changed, false if the transition was invalid or if the new state is the same as the current state.
+     */
+    pushState(newState, data = null) {
+        const changed = this._change(newState, data);
+        if (changed) {
+            // If the state was changed, we push the new state to the statesStack array.
+            this.statesStack.push({ state: newState, data: data, timestamp: Date.now() });
+        }
+        return changed;
+    }
+
+    /**
+     * Goes back to the previous state in the statesStack array, if possible. This method will only work if there is a valid transition from the 
+     *  current state to the previous state.
+     * 
+     * @param {Object} [data] Optional data to pass to the callbacks.
+     * @returns {boolean} true if the state was changed, false if the transition was invalid or if there is no previous state to go back to.
+     */
+    goBack(data = null) {
+        if (!this.canGoBack()) {
+            console.warn(`Cannot go back from state ${this.state}`);
+            return false;
+        }
+        const currentState = this.state;
+        const previousState = this.statesStack[this.statesStack.length - 2].state;
+        const changed = this._change(previousState, data || this.statesStack[this.statesStack.length - 2].data);
+        if (changed) {
+            // If the state was changed, we pop the current state from the statesStack array.
+            this.statesStack.pop();
+        }
+        return changed;
+    }
+
     /**
      * Change the current state to the specified new state. If the transition from the current state to the new state is valid according to the defined transitions, the state will be updated and the registered callbacks for the new state (and for "*") will be called.
      * 
@@ -287,7 +367,7 @@ export class StateController {
      * @param {Object} [data] Optional data to pass to the callbacks.
      * @returns {boolean} true if the state was changed, false if the transition was invalid or if the new state is the same as the current state.
      */
-    change(newState, data = null) {
+    _change(newState, data = null) {
         this.log(`Changing state from ${this.state} to ${newState}`);
         if (newState === this.state) {
             this.log(`State unchanged: ${newState}`);
